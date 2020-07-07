@@ -1,5 +1,5 @@
 from flask_classful import FlaskView
-from flask import request
+from flask import request, redirect, url_for
 
 from app import app
 from app.models import Board
@@ -25,6 +25,10 @@ class BoardView(FlaskView):
             return {'message': '저장 완료!'}
         except Exception:
             return {'error': '글을 저장하지 못했습니다'}
+
+    def delete(self, pk):
+        Board.objects(pk=pk).delete()
+        return {'message': '삭제 완료!'}
 
 
 BoardView.register(app)

@@ -26,6 +26,13 @@ class BoardView(FlaskView):
         except Exception:
             return {'error': '글을 저장하지 못했습니다'}
 
+    def put(self, pk):
+        title = request.values.get('title')
+        content = request.values.get('content')
+        board = Board.objects(pk=pk)
+        board.update(title=title, content=content)
+        return board.to_json()
+
     def delete(self, pk):
         Board.objects(pk=pk).delete()
         return {'message': '삭제 완료!'}

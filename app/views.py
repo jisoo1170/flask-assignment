@@ -8,8 +8,12 @@ from app.models import Board
 class BoardView(FlaskView):
     route_base = '/'
 
-    def get(self):
+    def index(self):
         board = Board.objects()
+        return board.to_json()
+
+    def get(self, pk):
+        board = Board.objects(pk=pk)
         return board.to_json()
 
     def post(self):

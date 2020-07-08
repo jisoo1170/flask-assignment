@@ -1,8 +1,8 @@
 from flask_classful import FlaskView
 from flask import request
 
-from app.models import Board
-from app.serailziers import BoardSchema
+from app.models.board import Board
+from app.serailziers.board import BoardSchema
 
 
 class BoardView(FlaskView):

@@ -1,7 +1,6 @@
 from flask_classful import FlaskView
-from flask import request, redirect, url_for
+from flask import request
 
-from app import app
 from app.models import Board
 
 
@@ -36,6 +35,3 @@ class BoardView(FlaskView):
     def delete(self, pk):
         Board.objects(pk=pk).delete()
         return {'message': '삭제 완료!'}
-
-
-BoardView.register(app)

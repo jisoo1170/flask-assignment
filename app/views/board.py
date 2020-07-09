@@ -1,5 +1,6 @@
 from flask_classful import FlaskView
 from flask import request
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from app.models.board import Board
 from app.serailziers.board import BoardSchema
@@ -17,11 +18,13 @@ class BoardView(FlaskView):
         board = Board.objects.get(pk=pk)
         return self.schema.dumps(board)
 
+    @jwt_required
     def post(self):
         try:
+            user = get_jwt_identity()
             title = request.values.get('title')
             content = request.values.get('content')
-            board = Board(title=title, content=content)
+            board = Board(user=user, title=title, content=content)
             board.save()
             return self.schema.dumps(board), 201
         except Exception:

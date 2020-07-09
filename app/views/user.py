@@ -4,9 +4,13 @@ from flask_bcrypt import generate_password_hash, check_password_hash
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt_identity
 
 from app.models.user import User
+from app.serailziers.user import UserSchema
 
 
 class UserView(FlaskView):
+    def __init__(self):
+        self.schema = UserSchema()
+
     # 회원가입
     @route('/signup', methods=['POST'])
     def signup(self):
@@ -26,7 +30,7 @@ class UserView(FlaskView):
         # 사용자 저장
         user = User(username=username, password=password1)
         user.save()
-        return user.to_json()
+        return {'message': '회원가입 완료!'}, 201
 
     @route('/login', methods=['POST'])
     def login(self):
@@ -40,14 +44,27 @@ class UserView(FlaskView):
         # if not check_password_hash(user[0].password, password):
         if password != user[0].password:
             return {'message': '패스워드가 일치하지않습니다.'}, 400
+        print(user[0].pk, username)
 
         # 토큰 발급
         token = {
-            'access_token': create_access_token(identity=username),
-            'refresh_token': create_refresh_token(identity=username)
+            'access_token': create_access_token(identity=str(user[0].pk)),
+            'refresh_token': create_refresh_token(identity=str(user[0].pk))
         }
         return jsonify(token), 200
 
+    @jwt_required
     def get(self):
-        user = User.objects()
-        return user.to_json()
+        user = User.objects.get(pk=get_jwt_identity())
+        return self.schema.dumps(user)
+
+    @jwt_required
+    def patch(self):
+        user = User.objects.get(pk=get_jwt_identity())
+        username = request.values.get('username')
+        password = request.values.get('password')
+        if username:
+            user.update(username=username)
+        if password:
+            user.update(password=password)
+        return self.schema.dumps(user)

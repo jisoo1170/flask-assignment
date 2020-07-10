@@ -1,6 +1,7 @@
 # flask 모듈에서 Flask 클래스를 가져옴
 from flask import Flask
 from flask_restplus import Api
+from flask_jwt_extended import JWTManager
 
 
 def create_app():
@@ -17,5 +18,9 @@ def create_app():
 
     # swagger
     api = Api(app, version='1.0', title='게시판', description='게시 등록,수정,삭제,조회 API입니다')
+
+    # jwt
+    jwt = JWTManager(app)
+    print(app.url_map)
 
     return app

@@ -10,7 +10,7 @@ from app.serailziers.board import BoardSchema
 class BoardView(FlaskView):
     def index(self):
         board = Board.objects()
-        return BoardSchema().dumps(board, many=True), 200
+        return BoardSchema(exclude=['comments']).dumps(board, many=True), 200
 
     def get(self, pk):
         board = Board.objects.get(pk=pk)
@@ -57,18 +57,17 @@ class BoardView(FlaskView):
 
 
 class CommentView(FlaskView):
-    # route_prefix로 했을 때는 안됐는데 route_base로 하니까 됐다. 이유가 뭐
     route_base = 'board/<board_pk>/comment'
 
     @jwt_required
     def post(self, board_pk):
-        content = request.values.get('content')
+        comment = request.values.get('content')
         user = User.objects.get(pk=get_jwt_identity())
 
-        comment = Comment(user=user, content=content)
+        comment = Comment(user=user, comment=comment)
 
         board = Board.objects.get(pk=board_pk)
-        board.comment.append(comment)
+        board.comments.append(comment)
         board.save()
         return BoardSchema().dumps(board), 201
 

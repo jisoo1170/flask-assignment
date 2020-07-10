@@ -32,6 +32,7 @@ class UserView(FlaskView):
         user.save()
         return {'message': '회원가입 완료!'}, 201
 
+    # 로그인
     @route('/login', methods=['POST'])
     def login(self):
         username = request.values.get('username')
@@ -53,18 +54,26 @@ class UserView(FlaskView):
         }
         return jsonify(token), 200
 
+    # 사용자 정보 보기 (마이페이지)
     @jwt_required
     def get(self):
         user = User.objects.get(pk=get_jwt_identity())
         return self.schema.dumps(user)
 
+    # 정보 수정
     @jwt_required
     def patch(self):
         user = User.objects.get(pk=get_jwt_identity())
         username = request.values.get('username')
         password = request.values.get('password')
         if username:
-            user.update(username=username)
+            user.modify(username=username)
         if password:
-            user.update(password=password)
+            user.modify(password=password)
         return self.schema.dumps(user)
+
+    # 사용자 삭제
+    @jwt_required
+    def delete(self):
+        User.objects.get(pk=get_jwt_identity())
+        return {'message': '삭제 완료!'}, 200

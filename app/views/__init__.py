@@ -1,8 +1,8 @@
-from .board import BoardView
+from .board import BoardView, CommentView
 from .user import UserView
 
 
 def register_api(app):
-    BoardView.register(app)
     UserView.register(app)
-
+    BoardView.register(app)
+    CommentView.register(app)

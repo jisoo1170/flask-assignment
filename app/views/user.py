@@ -8,9 +8,6 @@ from app.serailziers.user import UserSchema
 
 
 class UserView(FlaskView):
-    def __init__(self):
-        self.schema = UserSchema()
-
     # 회원가입
     @route('/signup', methods=['POST'])
     def signup(self):
@@ -58,7 +55,7 @@ class UserView(FlaskView):
     @jwt_required
     def get(self):
         user = User.objects.get(pk=get_jwt_identity())
-        return self.schema.dumps(user)
+        return UserSchema().dumps(user)
 
     # 정보 수정
     @jwt_required
@@ -66,11 +63,12 @@ class UserView(FlaskView):
         user = User.objects.get(pk=get_jwt_identity())
         username = request.values.get('username')
         password = request.values.get('password')
+
         if username:
             user.modify(username=username)
         if password:
             user.modify(password=password)
-        return self.schema.dumps(user)
+        return UserSchema().dumps(user)
 
     # 사용자 삭제
     @jwt_required

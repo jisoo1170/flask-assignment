@@ -8,16 +8,13 @@ from app.serailziers.board import BoardSchema
 
 
 class BoardView(FlaskView):
-    def __init__(self):
-        self.schema = BoardSchema()
-
     def index(self):
         board = Board.objects()
-        return self.schema.dumps(board, many=True), 200
+        return BoardSchema().dumps(board, many=True), 200
 
     def get(self, pk):
         board = Board.objects.get(pk=pk)
-        return self.schema.dumps(board)
+        return BoardSchema().dumps(board)
 
     @jwt_required
     def post(self):
@@ -25,9 +22,10 @@ class BoardView(FlaskView):
             user = get_jwt_identity()
             title = request.values.get('title')
             content = request.values.get('content')
+
             board = Board(user=user, title=title, content=content)
             board.save()
-            return self.schema.dumps(board), 201
+            return BoardSchema().dumps(board), 201
         except Exception:
             return {'error': '글을 저장하지 못했습니다'}, 404
 
@@ -35,20 +33,24 @@ class BoardView(FlaskView):
     def put(self, pk):
         board = Board.objects.get(pk=pk)
         user = User.objects.get(pk=get_jwt_identity())
+
         # 권한 확인
         if board.user != user:
             return {'error': '권한이 없습니다'}, 401
+
         title = request.values.get('title')
         content = request.values.get('content')
         board.modify(title=title, content=content)
-        return self.schema.dumps(board), 200
+        return BoardSchema().dumps(board), 200
 
     @jwt_required
     def delete(self, pk):
         board = Board.objects.get(pk=pk)
         user = User.objects.get(pk=get_jwt_identity())
+
         # 권한 확인
         if board.user != user:
             return {'error': '권한이 없습니다'}, 401
+
         board.delete()
         return {'message': '삭제 완료!'}, 200

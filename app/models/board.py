@@ -14,4 +14,4 @@ class Board(Document):
     user = fields.ReferenceField(User)
     title = fields.StringField(max_length=100, required=True)
     content = fields.StringField(required=True)
-    comments = fields.EmbeddedDocumentListField
+    comments = fields.EmbeddedDocumentListField(Comment)

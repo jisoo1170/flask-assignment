@@ -2,7 +2,7 @@ from flask_classful import FlaskView
 from flask import request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from app.models.board import Board
+from app.models.board import Board, Comment
 from app.models.user import User
 from app.serailziers.board import BoardSchema
 
@@ -54,3 +54,34 @@ class BoardView(FlaskView):
 
         board.delete()
         return {'message': '삭제 완료!'}, 200
+
+
+class CommentView(FlaskView):
+    # route_prefix로 했을 때는 안됐는데 route_base로 하니까 됐다. 이유가 뭐
+    route_base = 'board/<board_pk>/comment'
+
+    @jwt_required
+    def post(self, board_pk):
+        content = request.values.get('content')
+        user = User.objects.get(pk=get_jwt_identity())
+
+        comment = Comment(user=user, content=content)
+
+        board = Board.objects.get(pk=board_pk)
+        board.comment.append(comment)
+        board.save()
+        return BoardSchema().dumps(board), 201
+
+    # @jwt_required
+    # def put(self, board_pk, pk):
+    #     content = request.values.get('content')
+    #     user = User.objects.get(pk=get_jwt_identity())
+    #
+    #     comment = Comment.objects.get(pk=pk)
+    #
+    #     if comment.user != user:
+    #         return {'error': '권한이 없습니다'}, 401
+    #
+    #     board = Board.objects.get(pk=board_pk)
+    #     comment.modify(content=content)
+    #     return BoardSchema().dumps(board), 200

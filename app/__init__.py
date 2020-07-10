@@ -21,4 +21,6 @@ def create_app():
 
     # jwt
     jwt = JWTManager(app)
+    print(app.url_map)
+
     return app

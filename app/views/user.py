@@ -4,7 +4,9 @@ from flask_bcrypt import generate_password_hash, check_password_hash
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt_identity
 
 from app.models.user import User
+from app.models.board import Board
 from app.serailziers.user import UserSchema
+from app.serailziers.board import BoardSchema
 
 
 class UserView(FlaskView):
@@ -56,6 +58,17 @@ class UserView(FlaskView):
     def get(self):
         user = User.objects.get(pk=get_jwt_identity())
         return UserSchema().dumps(user)
+
+    # 내가 작성한 글 보기
+    @jwt_required
+    @route('/board')
+    def board(self):
+        user = User.objects.get(pk=get_jwt_identity())
+        board = Board.objects(user=user)
+        for b in board:
+            print(b.title)
+        schema = BoardSchema(only=("id", "title", "content"))
+        return schema.dumps(board, many=True), 200
 
     # 정보 수정
     @jwt_required

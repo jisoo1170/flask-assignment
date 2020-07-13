@@ -10,11 +10,11 @@ from app.serailziers.board import BoardSchema
 class BoardView(FlaskView):
     def index(self):
         board = Board.objects()
-        return BoardSchema(exclude=['comments']).dumps(board, many=True), 200
+        return BoardSchema(exclude=['comments']).dump(board, many=True), 200
 
     def get(self, id):
         board = Board.objects.get(id=id)
-        return BoardSchema().dumps(board)
+        return BoardSchema().dump(board)
 
     @jwt_required
     def post(self):
@@ -25,7 +25,7 @@ class BoardView(FlaskView):
 
             board = Board(user=user, title=title, content=content)
             board.save()
-            return BoardSchema().dumps(board), 201
+            return BoardSchema().dump(board), 201
         except Exception:
             return {'error': '글을 저장하지 못했습니다'}, 404
 
@@ -41,7 +41,7 @@ class BoardView(FlaskView):
         title = request.values.get('title')
         content = request.values.get('content')
         board.modify(title=title, content=content)
-        return BoardSchema().dumps(board), 200
+        return BoardSchema().dump(board), 200
 
     @jwt_required
     def delete(self, id):
@@ -69,7 +69,7 @@ class CommentView(FlaskView):
         board = Board.objects.get(id=board_id)
         board.comments.append(comment)
         board.save()
-        return BoardSchema().dumps(board), 201
+        return BoardSchema().dump(board), 201
 
     @jwt_required
     def put(self, board_id, id):
@@ -85,7 +85,7 @@ class CommentView(FlaskView):
         comment.content = content
         board.save()
 
-        return BoardSchema().dumps(board), 200
+        return BoardSchema().dump(board), 200
 
     @jwt_required
     def delete(self, board_id, id):
@@ -116,4 +116,10 @@ class RecommentView(FlaskView):
         comment = board.comments.get(id=comment_id)
         comment.recomments.append(recomment)
         board.save()
-        return BoardSchema().dumps(board), 201
+        return BoardSchema().dump(board), 201
+
+    @jwt_required
+    def put(self, board_id, comment_id, id):
+        user = User.objects.get(id=get_jwt_identity())
+        content = request.values.get('content')
+

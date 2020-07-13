@@ -55,7 +55,7 @@ class UserView(FlaskView):
     @jwt_required
     def get(self):
         user = User.objects.get(id=get_jwt_identity())
-        return UserSchema().dumps(user)
+        return UserSchema().dump(user)
 
     # 내가 작성한 글 보기
     @jwt_required
@@ -65,7 +65,7 @@ class UserView(FlaskView):
         board = Board.objects(user=user)
 
         schema = BoardSchema(only=("id", "title", "content"))
-        return schema.dumps(board, many=True), 200
+        return schema.dump(board, many=True), 200
 
     # 내가 작성한 댓글 보기
     @jwt_required
@@ -78,7 +78,8 @@ class UserView(FlaskView):
             comment += b.comments.filter(user=user)
 
         schema = CommentSchema(only=("id", "content"))
-        return schema.dumps(comment, many=True), 200
+        result = schema.dump(comment, many=True)
+        return {"comments": result}, 200
 
     # 정보 수정
     @jwt_required
@@ -91,7 +92,7 @@ class UserView(FlaskView):
             user.modify(username=username)
         if password:
             user.modify(password=password)
-        return UserSchema().dumps(user)
+        return UserSchema().dump(user)
 
     # 사용자 삭제
     @jwt_required

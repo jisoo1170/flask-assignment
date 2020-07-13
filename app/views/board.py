@@ -4,7 +4,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from app.models.board import Board, Comment, Recomment
 from app.models.user import User
-from app.serailziers.board import BoardSchema
+from app.serailziers.board import BoardSchema, CommentSchema, RecommentSchema
 
 
 class BoardView(FlaskView):
@@ -85,7 +85,7 @@ class CommentView(FlaskView):
         comment.content = content
         board.save()
 
-        return BoardSchema().dump(board), 200
+        return CommentSchema().dump(comment), 200
 
     @jwt_required
     def delete(self, board_id, id):
@@ -123,3 +123,28 @@ class RecommentView(FlaskView):
         user = User.objects.get(id=get_jwt_identity())
         content = request.values.get('content')
 
+        board = Board.objects.get(id=board_id)
+        recomment = board.comments.get(id=comment_id).recomments.get(id=id)
+
+        if recomment.user != user:
+            return {'error': '권한이 없습니다'}, 401
+
+        recomment.content = content
+        board.save()
+
+        return RecommentSchema().dump(recomment), 200
+
+    @jwt_required
+    def delete(self, board_id, comment_id, id):
+        user = User.objects.get(id=get_jwt_identity())
+
+        board = Board.objects.get(id=board_id)
+        comment = board.comments.get(id=comment_id)
+        recomment = comment.recomments.get(id=id)
+
+        if recomment.user != user:
+            return {'error': '권한이 없습니다'}, 401
+
+        comment.recomments.remove(recomment)
+        board.save()
+        return {'message': '삭제 완료!'}, 200

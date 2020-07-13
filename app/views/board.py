@@ -86,3 +86,18 @@ class CommentView(FlaskView):
         board.save()
 
         return BoardSchema().dumps(board), 200
+
+    @jwt_required
+    def delete(self, board_pk, pk):
+        user = User.objects.get(pk=get_jwt_identity())
+
+        board = Board.objects.get(pk=board_pk)
+        comment = board.comments.get(id=pk)
+
+        # 권한 확인
+        if comment.user != user:
+            return {'error': '권한이 없습니다'}, 401
+
+        board.comments.remove(comment)
+        board.save()
+        return {'message': '삭제 완료!'}, 200

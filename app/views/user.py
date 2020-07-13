@@ -68,7 +68,7 @@ class UserView(FlaskView):
         schema = BoardSchema(only=("id", "title", "content"))
         return schema.dumps(board, many=True), 200
 
-    # 내가 작성한 댓글 보
+    # 내가 작성한 댓글 보기
     @jwt_required
     @route('/comment')
     def board(self):

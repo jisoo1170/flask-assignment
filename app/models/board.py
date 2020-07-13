@@ -7,7 +7,7 @@ from .user import User
 class Comment(EmbeddedDocument):
     id = fields.ObjectIdField(default=ObjectId)
     user = fields.ReferenceField(User)
-    comment = fields.StringField()
+    content = fields.StringField()
 
 
 class Board(Document):

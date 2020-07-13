@@ -6,7 +6,7 @@ from .user import UserSchema
 class CommentSchema(Schema):
     id = fields.Str()
     user = fields.Nested(UserSchema, only=['username'])
-    comment = fields.Str()
+    content = fields.Str()
 
 
 class BoardSchema(Schema):

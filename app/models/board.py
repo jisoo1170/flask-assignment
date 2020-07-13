@@ -1,14 +1,17 @@
-from mongoengine import Document, EmbeddedDocument
-from mongoengine.fields import StringField, ReferenceField
+from mongoengine import Document, EmbeddedDocument, fields
+from bson import ObjectId
 
 from .user import User
 
 
-class Board(Document):
-    user = ReferenceField(User)
-    title = StringField(max_length=100, required=True)
-    content = StringField(required=True)
-
-
 class Comment(EmbeddedDocument):
-    content = StringField()
+    id = fields.ObjectIdField(default=ObjectId)
+    user = fields.ReferenceField(User)
+    content = fields.StringField()
+
+
+class Board(Document):
+    user = fields.ReferenceField(User)
+    title = fields.StringField(max_length=100, required=True)
+    content = fields.StringField(required=True)
+    comments = fields.EmbeddedDocumentListField(Comment)

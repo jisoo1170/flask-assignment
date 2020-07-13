@@ -1,12 +1,11 @@
 from flask_classful import FlaskView, route
-from flask import request, session, jsonify
-from flask_bcrypt import generate_password_hash, check_password_hash
+from flask import request, jsonify
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt_identity
 
 from app.models.user import User
-from app.models.board import Board
+from app.models.board import Board, Comment
 from app.serailziers.user import UserSchema
-from app.serailziers.board import BoardSchema
+from app.serailziers.board import BoardSchema, CommentSchema
 
 
 class UserView(FlaskView):
@@ -65,10 +64,22 @@ class UserView(FlaskView):
     def board(self):
         user = User.objects.get(pk=get_jwt_identity())
         board = Board.objects(user=user)
-        for b in board:
-            print(b.title)
+
         schema = BoardSchema(only=("id", "title", "content"))
         return schema.dumps(board, many=True), 200
+
+    # 내가 작성한 댓글 보기
+    @jwt_required
+    @route('/comment')
+    def board(self):
+        user = User.objects.get(pk=get_jwt_identity())
+        board = Board.objects.filter(comments__user=user)
+        comment = []
+        for b in board:
+            comment += b.comments.filter(user=user)
+
+        schema = CommentSchema(only=("id", "content"))
+        return schema.dumps(comment, many=True), 200
 
     # 정보 수정
     @jwt_required

@@ -2,15 +2,15 @@ from flask_classful import FlaskView
 from flask import request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from app.models.board import Board
+from app.models.board import Board, Comment
 from app.models.user import User
-from app.serailziers.board import BoardSchema
+from app.serailziers.board import BoardSchema, CommentSchema
 
 
 class BoardView(FlaskView):
     def index(self):
         board = Board.objects()
-        return BoardSchema().dumps(board, many=True), 200
+        return BoardSchema(exclude=['comments']).dumps(board, many=True), 200
 
     def get(self, pk):
         board = Board.objects.get(pk=pk)
@@ -53,4 +53,51 @@ class BoardView(FlaskView):
             return {'error': '권한이 없습니다'}, 401
 
         board.delete()
+        return {'message': '삭제 완료!'}, 200
+
+
+class CommentView(FlaskView):
+    route_base = 'board/<board_pk>/comment'
+
+    @jwt_required
+    def post(self, board_pk):
+        content = request.values.get('content')
+        user = User.objects.get(pk=get_jwt_identity())
+
+        comment = Comment(user=user, content=content)
+
+        board = Board.objects.get(pk=board_pk)
+        board.comments.append(comment)
+        board.save()
+        return BoardSchema().dumps(board), 201
+
+    @jwt_required
+    def put(self, board_pk, pk):
+        content = request.values.get('content')
+        user = User.objects.get(pk=get_jwt_identity())
+
+        board = Board.objects.get(pk=board_pk)
+        comment = board.comments.get(id=pk)
+
+        if comment.user != user:
+            return {'error': '권한이 없습니다'}, 401
+
+        comment.content = content
+        board.save()
+
+        return BoardSchema().dumps(board), 200
+
+    @jwt_required
+    def delete(self, board_pk, pk):
+        user = User.objects.get(pk=get_jwt_identity())
+
+        board = Board.objects.get(pk=board_pk)
+        comment = board.comments.get(id=pk)
+
+        # 권한 확인
+        if comment.user != user:
+            return {'error': '권한이 없습니다'}, 401
+
+        board.comments.remove(comment)
+        board.save()
         return {'message': '삭제 완료!'}, 200

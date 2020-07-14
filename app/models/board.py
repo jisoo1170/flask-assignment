@@ -23,3 +23,4 @@ class Board(Document):
     content = fields.StringField(required=True)
     comments = fields.EmbeddedDocumentListField(Comment)
     tags = fields.ListField(fields.StringField(max_length=20))
+    likes = fields.ListField(fields.StringField())

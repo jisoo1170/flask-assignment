@@ -1,6 +1,5 @@
 from flask_classful import FlaskView
 from flask import request
-from mongoengine import Q
 
 from app.models.board import Board
 from app.serailziers.board import BoardSchema

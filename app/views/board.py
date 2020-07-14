@@ -1,4 +1,4 @@
-from flask_classful import FlaskView
+from flask_classful import FlaskView, route
 from flask import request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
@@ -56,6 +56,18 @@ class BoardView(FlaskView):
 
         board.delete()
         return {'message': '삭제 완료!'}, 200
+
+    @jwt_required
+    @route('/<id>/like/', methods=['POST'])
+    def like(self, id):
+        board = Board.objects.get(id=id)
+        user_id = get_jwt_identity()
+        # 이미 좋아요를 누른 경우 좋아요 취소
+        if user_id in board.likes:
+            board.modify(pull__likes=user_id)
+        else:
+            board.modify(add_to_set__likes=[user_id])
+        return BoardSchema().dump(board), 200
 
 
 class CommentView(FlaskView):

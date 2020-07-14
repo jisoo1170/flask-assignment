@@ -1,5 +1,6 @@
 from .board import BoardView, CommentView, RecommentView
 from .user import UserView
+from .search import SearchView
 
 
 def register_api(app):
@@ -7,3 +8,4 @@ def register_api(app):
     BoardView.register(app)
     CommentView.register(app)
     RecommentView.register(app)
+    SearchView.register(app)

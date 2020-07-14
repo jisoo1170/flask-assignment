@@ -9,12 +9,11 @@ from app.serailziers.board import BoardSchema, CommentSchema, RecommentSchema
 
 class BoardView(FlaskView):
     def index(self):
-        board = Board.objects()
-        return BoardSchema(exclude=['comments']).dump(board, many=True), 200
+        boards = Board.objects()
+        return BoardSchema().dump(boards, many=True), 200
 
     def get(self, id):
         board = Board.objects.get(id=id)
-        print(BoardSchema().dump(board))
         return BoardSchema().dump(board)
 
     @jwt_required
@@ -23,7 +22,8 @@ class BoardView(FlaskView):
             user = get_jwt_identity()
             title = request.form['title']
             content = request.form['content']
-            tags = request.form['tags'].split(",")
+            tags = request.form['tags'].lower().replace(' ', '').split(",")
+
             board = Board(user=user, title=title, content=content, tags=tags)
             board.save()
             return BoardSchema().dump(board), 201

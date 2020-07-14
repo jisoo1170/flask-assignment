@@ -41,7 +41,8 @@ class BoardView(FlaskView):
 
         title = request.form['title']
         content = request.form['content']
-        board.modify(title=title, content=content)
+        tags = request.form['tags'].split(",")
+        board.modify(title=title, content=content, tags=tags)
         return BoardSchema().dump(board), 200
 
     @jwt_required

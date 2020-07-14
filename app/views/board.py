@@ -17,12 +17,11 @@ class BoardView(FlaskView):
         return BoardSchema().dump(board)
 
     @jwt_required
-    def post(self):
+    def post(self, **data):
         try:
             user = get_jwt_identity()
-            title = request.values.get('title')
-            content = request.values.get('content')
-
+            title = request.form['title']
+            content = request.form['content']
             board = Board(user=user, title=title, content=content)
             board.save()
             return BoardSchema().dump(board), 201
@@ -38,8 +37,8 @@ class BoardView(FlaskView):
         if board.user != user:
             return {'error': '권한이 없습니다'}, 401
 
-        title = request.values.get('title')
-        content = request.values.get('content')
+        title = request.form['title']
+        content = request.form['content']
         board.modify(title=title, content=content)
         return BoardSchema().dump(board), 200
 
@@ -61,7 +60,7 @@ class CommentView(FlaskView):
 
     @jwt_required
     def post(self, board_id):
-        content = request.values.get('content')
+        content = request.form['content']
         user = User.objects.get(id=get_jwt_identity())
 
         comment = Comment(user=user, content=content)
@@ -73,7 +72,7 @@ class CommentView(FlaskView):
 
     @jwt_required
     def put(self, board_id, id):
-        content = request.values.get('content')
+        content = request.form['content']
         user = User.objects.get(id=get_jwt_identity())
 
         board = Board.objects.get(id=board_id)
@@ -109,7 +108,7 @@ class RecommentView(FlaskView):
     @jwt_required
     def post(self, board_id, comment_id):
         user = User.objects.get(id=get_jwt_identity())
-        content = request.values.get('content')
+        content = request.form['content']
         recomment = Recomment(user=user, content=content)
 
         board = Board.objects.get(id=board_id)
@@ -121,7 +120,7 @@ class RecommentView(FlaskView):
     @jwt_required
     def put(self, board_id, comment_id, id):
         user = User.objects.get(id=get_jwt_identity())
-        content = request.values.get('content')
+        content = request.form['content']
 
         board = Board.objects.get(id=board_id)
         recomment = board.comments.get(id=comment_id).recomments.get(id=id)

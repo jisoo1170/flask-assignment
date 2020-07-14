@@ -12,9 +12,9 @@ class UserView(FlaskView):
     # 회원가입
     @route('/signup', methods=['POST'])
     def signup(self):
-        username = request.values.get('username')
-        password1 = request.values.get('password1')
-        password2 = request.values.get('password2')
+        username = request.form['username']
+        password1 = request.form['password1']
+        password2 = request.form['password2']
 
         # 유효성 검사
         if User.objects(username=username):
@@ -33,8 +33,8 @@ class UserView(FlaskView):
     # 로그인
     @route('/login', methods=['POST'])
     def login(self):
-        username = request.values.get('username')
-        password = request.values.get('password')
+        username = request.form['username']
+        password = request.form['password']
 
         # 유효성 검사
         user = User.objects(username=username)
@@ -61,8 +61,8 @@ class UserView(FlaskView):
     @jwt_required
     def patch(self):
         user = User.objects.get(id=get_jwt_identity())
-        username = request.values.get('username')
-        password = request.values.get('password')
+        username = request.form['username']
+        password = request.form['password']
 
         if username:
             user.modify(username=username)
@@ -91,7 +91,7 @@ class UserView(FlaskView):
     @route('/comment')
     def comment(self):
         user = User.objects.get(id=get_jwt_identity())
-        board = Board.objects.filter(comments__user=user)
+        board = Board.objects(comments__user=user)
         comments = []
         for b in board:
             comments += b.comments.filter(user=user)
@@ -100,12 +100,12 @@ class UserView(FlaskView):
         result = schema.dump(comments, many=True)
         return {"comments": result}, 200
 
-    # 내가 작성한 댓글 보기
+    # 내가 작성한 대댓글 보기
     @jwt_required
     @route('/recomment')
     def recomment(self):
         user = User.objects.get(id=get_jwt_identity())
-        board = Board.objects.filter(comments__recomments__user=user)
+        board = Board.objects(comments__recomments__user=user)
 
         recomments = []
         for b in board:

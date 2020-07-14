@@ -4,9 +4,9 @@ from .user import UserSchema
 
 
 class RecommentSchema(Schema):
-    id = fields.Str()
+    id = fields.String()
     user = fields.Nested(UserSchema, only=['username'])
-    content = fields.Str()
+    content = fields.String()
 
     class Meta:
         fields = ("id", "user", "content")
@@ -14,9 +14,9 @@ class RecommentSchema(Schema):
 
 
 class CommentSchema(Schema):
-    id = fields.Str()
+    id = fields.String()
     user = fields.Nested(UserSchema, only=['username'])
-    content = fields.Str()
+    content = fields.String()
     recomments = fields.Nested(RecommentSchema, many=True)
 
     class Meta:
@@ -25,14 +25,15 @@ class CommentSchema(Schema):
 
 
 class BoardSchema(Schema):
-    id = fields.Str()
+    id = fields.String()
     user = fields.Nested(UserSchema, only=['username'])
-    title = fields.Str()
-    content = fields.Str()
+    title = fields.String()
+    content = fields.String()
     comments = fields.Nested(CommentSchema, many=True)
+    tags = fields.List(fields.String())
 
     class Meta:
-        fields = ("id", "user", "title", "content", "comments")
+        fields = ("id", "user", "title", "content", "tags", "comments")
         ordered = True
 
     @post_dump(pass_many=True)

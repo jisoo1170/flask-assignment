@@ -9,20 +9,22 @@ from app.serailziers.board import BoardSchema, CommentSchema, RecommentSchema
 
 class BoardView(FlaskView):
     def index(self):
-        board = Board.objects()
-        return BoardSchema(exclude=['comments']).dump(board, many=True), 200
+        boards = Board.objects()
+        return BoardSchema().dump(boards, many=True), 200
 
     def get(self, id):
         board = Board.objects.get(id=id)
         return BoardSchema().dump(board)
 
     @jwt_required
-    def post(self, **data):
+    def post(self):
         try:
             user = get_jwt_identity()
             title = request.form['title']
             content = request.form['content']
-            board = Board(user=user, title=title, content=content)
+            tags = request.form['tags'].lower().replace(' ', '').split(",")
+
+            board = Board(user=user, title=title, content=content, tags=tags)
             board.save()
             return BoardSchema().dump(board), 201
         except Exception:
@@ -39,7 +41,8 @@ class BoardView(FlaskView):
 
         title = request.form['title']
         content = request.form['content']
-        board.modify(title=title, content=content)
+        tags = request.form['tags'].split(",")
+        board.modify(title=title, content=content, tags=tags)
         return BoardSchema().dump(board), 200
 
     @jwt_required

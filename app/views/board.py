@@ -10,7 +10,7 @@ from app.serailziers.board import BoardSchema, CommentSchema, RecommentSchema
 class BoardView(FlaskView):
     def index(self):
         boards = Board.objects()
-        return BoardSchema().dump(boards, many=True), 200
+        return BoardSchema(exclude=['comments', 'likes']).dump(boards, many=True), 200
 
     def get(self, id):
         board = Board.objects.get(id=id)
@@ -64,9 +64,9 @@ class BoardView(FlaskView):
         user_id = get_jwt_identity()
         # 이미 좋아요를 누른 경우 좋아요 취소
         if user_id in board.likes:
-            board.modify(pull__likes=user_id)
+            board.modify(pull__likes=user_id, likes_count=board.likes_count-1)
         else:
-            board.modify(add_to_set__likes=[user_id])
+            board.modify(add_to_set__likes=[user_id], likes_count=board.likes_count+1)
         return BoardSchema().dump(board), 200
 
 

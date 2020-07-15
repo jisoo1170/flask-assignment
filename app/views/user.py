@@ -61,8 +61,8 @@ class UserView(FlaskView):
     @jwt_required
     def patch(self):
         user = User.objects.get(id=get_jwt_identity())
-        username = request.form['username']
-        password = request.form['password']
+        username = request.values.get('username')
+        password = request.values.get('password')
 
         if username:
             user.modify(username=username)

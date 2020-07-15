@@ -32,9 +32,10 @@ class BoardSchema(Schema):
     comments = fields.Nested(CommentSchema, many=True)
     tags = fields.List(fields.String())
     likes = fields.List(fields.String())
+    likes_count = fields.Integer()
 
     class Meta:
-        # fields = ("id", "user", "title", "content", "tags", "comments")
+        # fields = ("id", "user", "title", "content", "tags", "comments", "likes_count")
         ordered = True
 
     @post_dump(pass_many=True)

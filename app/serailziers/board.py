@@ -31,7 +31,7 @@ class BoardSchema(Schema):
     content = fields.String()
     comments = fields.Nested(CommentSchema, many=True)
     tags = fields.List(fields.String())
-    likes = fields.List(fields.String())
+    likes = fields.List(fields.Nested(UserSchema, only=['username']))
     num_of_likes = fields.Integer()
 
     class Meta:

@@ -64,12 +64,12 @@ class BoardView(FlaskView):
     @route('/<id>/like/', methods=['POST'])
     def like(self, id):
         board = Board.objects.get(id=id)
-        user_id = get_jwt_identity()
+        user = User.objects.get(id=get_jwt_identity())
         # 이미 좋아요를 누른 경우 좋아요 취소
-        if user_id in board.likes:
-            board.modify(pull__likes=user_id)
+        if user in board.likes:
+            board.modify(pull__likes=user)
         else:
-            board.modify(add_to_set__likes=[user_id])
+            board.modify(add_to_set__likes=[user])
         board.modify(num_of_likes=len(board.likes))
         return BoardSchema().dump(board), 200
 

@@ -116,3 +116,12 @@ class UserView(FlaskView):
         schema = RecommentSchema(only=("id", "content"))
         result = schema.dump(recomments, many=True)
         return {"recomments": result}, 200
+
+    # 좋아요 한 게시글 보기
+    @jwt_required
+    @route('/like')
+    def like(self):
+        user = User.objects.get(id=get_jwt_identity())
+        board = Board.objects(likes__in=[user])
+        schema = BoardSchema(only=("id", "title", "content"))
+        return schema.dump(board, many=True), 200

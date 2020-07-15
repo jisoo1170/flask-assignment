@@ -120,6 +120,21 @@ class CommentView(FlaskView):
         board.save()
         return {'message': '삭제 완료!'}, 200
 
+    @jwt_required
+    @route('/<id>/like/', methods=['POST'])
+    def like(self, board_id, id):
+        board = Board.objects.get(id=board_id)
+        comment = board.comments.get(id=id)
+        user_id = get_jwt_identity()
+        # 이미 좋아요를 누른 경우 좋아요 취소
+        if user_id in comment.likes:
+            comment.likes.remove(user_id)
+        else:
+            comment.likes.append(user_id)
+        comment.num_of_likes = len(comment.likes)
+        board.save()
+        return CommentSchema().dump(comment), 200
+
 
 class RecommentView(FlaskView):
     route_base = 'board/<board_id>/comment/<comment_id>/recomment'

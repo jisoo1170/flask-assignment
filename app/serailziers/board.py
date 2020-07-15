@@ -7,6 +7,7 @@ class RecommentSchema(Schema):
     id = fields.String()
     user = fields.Nested(UserSchema, only=['username'])
     content = fields.String()
+    likes = fields.String()
 
     class Meta:
         fields = ("id", "user", "content")
@@ -18,9 +19,12 @@ class CommentSchema(Schema):
     user = fields.Nested(UserSchema, only=['username'])
     content = fields.String()
     recomments = fields.Nested(RecommentSchema, many=True)
+    likes = fields.List(fields.String())
+    num_of_likes = fields.Function(lambda obj: len(obj.likes))
+
 
     class Meta:
-        fields = ("id", "user", "content", "recomments")
+        # fields = ("id", "user", "content", "recomments", "likes", "num_of_likes")
         ordered = True
 
 

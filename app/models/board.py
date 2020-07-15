@@ -8,6 +8,7 @@ class Recomment(EmbeddedDocument):
     id = fields.ObjectIdField(default=ObjectId)
     user = fields.ReferenceField(User)
     content = fields.StringField()
+    likes = fields.ListField(fields.StringField())
 
 
 class Comment(EmbeddedDocument):
@@ -15,6 +16,7 @@ class Comment(EmbeddedDocument):
     user = fields.ReferenceField(User)
     content = fields.StringField()
     recomments = fields.EmbeddedDocumentListField(Recomment)
+    likes = fields.ListField(fields.StringField())
 
 
 class Board(Document):

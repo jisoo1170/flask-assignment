@@ -1,4 +1,5 @@
-from .board import BoardView, CommentView, RecommentView
+from .board import BoardView
+from .comment import CommentView, RecommentView
 from .user import UserView
 from .search import SearchView
 

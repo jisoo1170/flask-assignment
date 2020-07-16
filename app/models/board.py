@@ -1,29 +1,13 @@
-from mongoengine import Document, EmbeddedDocument, fields
-from bson import ObjectId
+from mongoengine import Document, fields
 
 from .user import User
-
-
-class Recomment(EmbeddedDocument):
-    id = fields.ObjectIdField(default=ObjectId)
-    user = fields.ReferenceField(User)
-    content = fields.StringField()
-    likes = fields.ListField(fields.StringField())
-
-
-class Comment(EmbeddedDocument):
-    id = fields.ObjectIdField(default=ObjectId)
-    user = fields.ReferenceField(User)
-    content = fields.StringField()
-    recomments = fields.EmbeddedDocumentListField(Recomment)
-    likes = fields.ListField(fields.StringField())
 
 
 class Board(Document):
     user = fields.ReferenceField(User)
     title = fields.StringField(max_length=100, required=True)
     content = fields.StringField(required=True)
-    comments = fields.EmbeddedDocumentListField(Comment)
+    # comments = fields.EmbeddedDocumentListField(Comment)
     tags = fields.ListField(fields.StringField(max_length=20))
     likes = fields.ListField(fields.ReferenceField(User))
     num_of_likes = fields.IntField(min_value=0, default=0)

@@ -4,8 +4,10 @@ from flask_jwt_extended import jwt_required, create_access_token, create_refresh
 
 from app.models.user import User
 from app.models.board import Board
+from app.models.comment import Comment
 from app.serailziers.user import UserSchema
-from app.serailziers.board import BoardSchema, CommentSchema, RecommentSchema
+from app.serailziers.board import BoardSchema
+from app.serailziers.comment import CommentSchema, RecommentSchema
 
 
 class UserView(FlaskView):
@@ -22,9 +24,6 @@ class UserView(FlaskView):
         if password1 != password2:
             return {'message': '패스워드가 일치하지않습니다.'}, 400
 
-        # 비밀번호 암호화
-        # password = generate_password_hash('password1')
-
         # 사용자 저장
         user = User(username=username, password=password1)
         user.save()
@@ -40,7 +39,6 @@ class UserView(FlaskView):
         user = User.objects(username=username)
         if not user:
             return {'message': '회원가입을 먼저 해주세요'}, 400
-        # if not check_password_hash(user[0].password, password):
         if password != user[0].password:
             return {'message': '패스워드가 일치하지않습니다.'}, 400
 
@@ -91,27 +89,21 @@ class UserView(FlaskView):
     @route('/comment')
     def comment(self):
         user = User.objects.get(id=get_jwt_identity())
-        board = Board.objects(comments__user=user)
-        comments = []
-        for b in board:
-            comments += b.comments.filter(user=user)
+        comment = Comment.objects(user=user)
 
         schema = CommentSchema(only=("id", "content"))
-        result = schema.dump(comments, many=True)
-        return {"comments": result}, 200
+        return schema.dump(comment, many=True), 200
 
     # 내가 작성한 대댓글 보기
     @jwt_required
     @route('/recomment')
     def recomment(self):
         user = User.objects.get(id=get_jwt_identity())
-        board = Board.objects(comments__recomments__user=user)
+        comment = Comment.objects(recomments__user=user)
 
         recomments = []
-        for b in board:
-            comment = b.comments
-            for c in comment:
-                recomments += c.recomments.filter(user=user)
+        for c in comment:
+            recomments += c.recomments.filter(user=user)
 
         schema = RecommentSchema(only=("id", "content"))
         result = schema.dump(recomments, many=True)

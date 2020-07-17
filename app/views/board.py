@@ -13,21 +13,22 @@ class BoardView(FlaskView):
         order = request.args.get('order')
         if order:
             boards = boards.order_by('-'+order)
-        return BoardSchema(exclude=['user', 'likes', 'tags']).dump(boards, many=True), 200
+        return BoardSchema(exclude=['user', 'likes', 'tags'], many=True).dump(boards), 200
 
-    def get(self, id):
-        board = Board.objects.get(id=id)
-        return BoardSchema().dump(board)
+    def get(self, board_id):
+        try:
+            return BoardSchema().dump(Board.objects.get(id=board_id)), 200
+        except Exception:
+            return {'error': '존재하지 않는 게시글입니다.'}, 404
 
     @jwt_required
     def post(self):
         try:
             user = get_jwt_identity()
-            title = request.form['title']
-            content = request.form['content']
-            tags = request.form['tags'].lower().replace(' ', '').split(",")
-
-            board = Board(user=user, title=title, content=content, tags=tags)
+            title = request.json['title']
+            content = request.json['content']
+            tags = request.json['tags']
+            board = Board(title=title, content=content, user=user, tags=tags)
             board.save()
             return BoardSchema().dump(board), 201
         except Exception:
@@ -35,22 +36,29 @@ class BoardView(FlaskView):
 
     @jwt_required
     def put(self, id):
-        board = Board.objects.get(id=id)
+        try:
+            board = Board.objects.get(id=id)
+        except Exception:
+            return {'error': '존재하지 않는 게시글입니다.'}, 404
+
         user = User.objects.get(id=get_jwt_identity())
 
         # 권한 확인
         if board.user != user:
             return {'error': '권한이 없습니다'}, 401
 
-        title = request.form['title']
-        content = request.form['content']
-        tags = request.form['tags'].split(",")
+        title = request.json['title']
+        content = request.json['content']
+        tags = request.json['tags']
         board.modify(title=title, content=content, tags=tags)
         return BoardSchema().dump(board), 200
 
     @jwt_required
     def delete(self, id):
-        board = Board.objects.get(id=id)
+        try:
+            board = Board.objects.get(id=id)
+        except Exception:
+            return {'error': '존재하지 않는 게시글입니다.'}, 404
         user = User.objects.get(id=get_jwt_identity())
 
         # 권한 확인
@@ -58,13 +66,17 @@ class BoardView(FlaskView):
             return {'error': '권한이 없습니다'}, 401
 
         board.delete()
-        return {'message': '삭제 완료!'}, 200
+        return {'message': '삭제 완료!'}, 204
 
     @jwt_required
     @route('/<id>/like', methods=['POST'])
     def like(self, id):
-        board = Board.objects.get(id=id)
+        try:
+            board = Board.objects.get(id=id)
+        except Exception:
+            return {'error': '존재하지 않는 게시글입니다.'}, 404
         user = User.objects.get(id=get_jwt_identity())
+
         # 이미 좋아요를 누른 경우 좋아요 취소
         if user in board.likes:
             board.modify(pull__likes=user)

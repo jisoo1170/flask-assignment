@@ -14,9 +14,9 @@ class UserView(FlaskView):
     # 회원가입
     @route('/signup', methods=['POST'])
     def signup(self):
-        username = request.form['username']
-        password1 = request.form['password1']
-        password2 = request.form['password2']
+        username = request.json['username']
+        password1 = request.json['password1']
+        password2 = request.json['password2']
 
         # 유효성 검사
         if User.objects(username=username):
@@ -27,13 +27,13 @@ class UserView(FlaskView):
         # 사용자 저장
         user = User(username=username, password=password1)
         user.save()
-        return {'message': '회원가입 완료!'}, 201
+        return UserSchema().dump(user), 201
 
     # 로그인
     @route('/login', methods=['POST'])
     def login(self):
-        username = request.form['username']
-        password = request.form['password']
+        username = request.json['username']
+        password = request.json['password']
 
         # 유효성 검사
         user = User.objects(username=username)
@@ -59,8 +59,8 @@ class UserView(FlaskView):
     @jwt_required
     def patch(self):
         user = User.objects.get(id=get_jwt_identity())
-        username = request.values.get('username')
-        password = request.values.get('password')
+        username = request.json['username']
+        password = request.json['password']
 
         if username:
             user.modify(username=username)
@@ -81,8 +81,7 @@ class UserView(FlaskView):
         user = User.objects.get(id=get_jwt_identity())
         board = Board.objects(user=user)
 
-        schema = BoardSchema(only=("id", "title", "content"))
-        return schema.dump(board, many=True), 200
+        return BoardSchema(only=("id", "title", "content")).dump(board, many=True), 200
 
     # 내가 작성한 댓글 보기
     @jwt_required
@@ -91,8 +90,7 @@ class UserView(FlaskView):
         user = User.objects.get(id=get_jwt_identity())
         comment = Comment.objects(user=user)
 
-        schema = CommentSchema(only=("id", "content"))
-        return schema.dump(comment, many=True), 200
+        return CommentSchema(only=("id", "content")).dump(comment, many=True), 200
 
     # 내가 작성한 대댓글 보기
     @jwt_required
@@ -105,8 +103,7 @@ class UserView(FlaskView):
         for c in comment:
             recomments += c.recomments.filter(user=user)
 
-        schema = RecommentSchema(only=("id", "content"))
-        result = schema.dump(recomments, many=True)
+        result = RecommentSchema(only=("id", "content")).dump(recomments, many=True)
         return {"recomments": result}, 200
 
     # 좋아요 한 게시글 보기
@@ -115,5 +112,4 @@ class UserView(FlaskView):
     def like(self):
         user = User.objects.get(id=get_jwt_identity())
         board = Board.objects(likes__in=[user])
-        schema = BoardSchema(only=("id", "title", "content"))
-        return schema.dump(board, many=True), 200
+        return BoardSchema(only=("id", "title", "content")).dump(board, many=True), 200

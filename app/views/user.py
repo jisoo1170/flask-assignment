@@ -4,7 +4,7 @@ from flask_jwt_extended import jwt_required, create_access_token, create_refresh
 
 from app.models.user import User
 from app.models.board import Board
-from app.models.comment import Comment
+from app.models.comment import Comment, Recomment
 from app.serailziers.user import UserSchema
 from app.serailziers.board import BoardSchema
 from app.serailziers.comment import CommentSchema, RecommentSchema
@@ -13,10 +13,11 @@ from app.serailziers.comment import CommentSchema, RecommentSchema
 class UserView(FlaskView):
     # 회원가입
     @route('/signup', methods=['POST'])
-    def signup(self):
+    def signup(self, **kwargs):
         username = request.json['username']
         password1 = request.json['password1']
         password2 = request.json['password2']
+        result = UserSchema().load(request.json)
 
         # 유효성 검사
         if User.objects(username=username):
@@ -59,6 +60,7 @@ class UserView(FlaskView):
     @jwt_required
     def patch(self):
         user = User.objects.get(id=get_jwt_identity())
+
         username = request.json['username']
         password = request.json['password']
 
@@ -97,14 +99,9 @@ class UserView(FlaskView):
     @route('/recomment')
     def recomment(self):
         user = User.objects.get(id=get_jwt_identity())
-        comment = Comment.objects(recomments__user=user)
+        recomment = Recomment.objects(user=user)
 
-        recomments = []
-        for c in comment:
-            recomments += c.recomments.filter(user=user)
-
-        result = RecommentSchema(only=("id", "content")).dump(recomments, many=True)
-        return {"recomments": result}, 200
+        return {"recomments": RecommentSchema(only=("id", "content")).dump(recomment, many=True)}, 200
 
     # 좋아요 한 게시글 보기
     @jwt_required

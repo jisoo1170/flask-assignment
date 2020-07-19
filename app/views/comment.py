@@ -54,6 +54,9 @@ class CommentView(FlaskView):
         if comment.user != user:
             return {'error': '권한이 없습니다'}, 401
 
+        # 댓글에 달린 대댓글 삭제
+        Recomment.objects(comment_id=id).delete()
+
         comment.delete()
         return {'message': '삭제 완료!'}, 200
 
@@ -80,22 +83,15 @@ class RecommentView(FlaskView):
 
     @jwt_required
     def post(self, board_id, comment_id):
-        try:
-            comment = Comment.objects.get(id=comment_id)
-        except Exception:
-            return {'error': '존재하지 않는 댓글입니다.'}, 404
-
         user = User.objects.get(id=get_jwt_identity())
-        recomment = Recomment(user=user, content=request.json['content'])
-
-        comment.modify(add_to_set__recomments=[recomment])
+        recomment = Recomment(user=user, comment_id=comment_id, content=request.json['content'])
+        recomment.save()
         return RecommentSchema().dump(recomment), 201
 
     @jwt_required
     def put(self, board_id, comment_id, id):
         try:
-            comment = Comment.objects.get(id=comment_id)
-            recomment = comment.recomments.get(id=id)
+            recomment = Recomment.objects.get(id=id)
         except Exception:
             return {'error': '존재하지 않는 대댓글입니다.'}, 404
 
@@ -103,16 +99,13 @@ class RecommentView(FlaskView):
         if recomment.user != user:
             return {'error': '권한이 없습니다'}, 401
 
-        recomment.content = request.json['content']
-        comment.save()
-
+        recomment.modify(content=request.json['content'])
         return RecommentSchema().dump(recomment), 200
 
     @jwt_required
     def delete(self, board_id, comment_id, id):
         try:
-            comment = Comment.objects.get(id=comment_id)
-            recomment = comment.recomments.get(id=id)
+            recomment = Recomment.get(id=id)
         except Exception:
             return {'error': '존재하지 않는 대댓글입니다.'}, 404
 
@@ -121,23 +114,21 @@ class RecommentView(FlaskView):
         if recomment.user != user:
             return {'error': '권한이 없습니다'}, 401
 
-        comment.update(pull__recomments=recomment)
+        recomment.delete()
         return {'message': '삭제 완료!'}, 204
 
     @jwt_required
     @route('/<id>/like', methods=['POST'])
     def like(self, board_id, comment_id, id):
         try:
-            comment = Comment.objects.get(id=comment_id)
-            recomment = comment.recomments.get(id=id)
+            recomment = Recomment.objects.get(id=id)
         except Exception:
             return {'error': '존재하지 않는 대댓글입니다.'}, 404
 
         user_id = get_jwt_identity()
         # 이미 좋아요를 누른 경우 좋아요 취소
         if user_id in recomment.likes:
-            recomment.likes.remove(user_id)
+            recomment.modify(pull__likes=user_id)
         else:
-            recomment.likes.append(user_id)
-        comment.save()
+            recomment.modify(add_to_set__likes=[user_id])
         return RecommentSchema().dump(recomment), 200

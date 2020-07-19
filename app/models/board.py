@@ -10,3 +10,4 @@ class Board(Document):
     tags = fields.ListField(fields.StringField(max_length=20))
     likes = fields.ListField(fields.ReferenceField(User))
     num_of_likes = fields.IntField(min_value=0, default=0)
+    num_of_views = fields.IntField(min_value=0, default=0)

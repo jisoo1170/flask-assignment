@@ -11,6 +11,7 @@ class BoardSchema(Schema):
     tags = fields.List(fields.String())
     likes = fields.List(fields.Nested(UserSchema, only=['username']))
     num_of_likes = fields.Integer()
+    num_of_views = fields.Integer()
 
     @post_dump(pass_many=True)
     def wrap(self, data, many, **kwargs):

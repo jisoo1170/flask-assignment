@@ -18,7 +18,9 @@ class BoardView(FlaskView):
 
     def get(self, board_id):
         try:
-            return BoardSchema().dump(Board.objects.get(id=board_id)), 200
+            board = Board.objects.get(id=board_id)
+            board.modify(inc__num_of_views=1)
+            return BoardSchema().dump(board), 200
         except Exception:
             return {'error': '존재하지 않는 게시글입니다.'}, 404
 

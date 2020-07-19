@@ -1,6 +1,7 @@
 from flask_classful import FlaskView, route
 from flask import request, jsonify
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt_identity
+from marshmallow import ValidationError
 
 from app.models.user import User
 from app.models.board import Board
@@ -13,40 +14,40 @@ from app.serailziers.comment import CommentSchema, RecommentSchema
 class UserView(FlaskView):
     # 회원가입
     @route('/signup', methods=['POST'])
-    def signup(self, **kwargs):
-        username = request.json['username']
-        password1 = request.json['password1']
-        password2 = request.json['password2']
-        result = UserSchema().load(request.json)
+    def signup(self):
+        try:
+            data = UserSchema().load(request.json)
+        except ValidationError as err:
+            return err.messages, 400
 
         # 유효성 검사
-        if User.objects(username=username):
+        if User.objects(username=data['username']):
             return {'message': '존재하는 닉네임입니다.'}, 400
-        if password1 != password2:
-            return {'message': '패스워드가 일치하지않습니다.'}, 400
 
         # 사용자 저장
-        user = User(username=username, password=password1)
+        user = User(**data)
         user.save()
         return UserSchema().dump(user), 201
 
     # 로그인
     @route('/login', methods=['POST'])
     def login(self):
-        username = request.json['username']
-        password = request.json['password']
+        try:
+            data = UserSchema().load(request.json)
+        except ValidationError as err:
+            return err.messages, 400
 
         # 유효성 검사
-        user = User.objects(username=username)
+        user = User.objects.get(username=data['username'])
         if not user:
             return {'message': '회원가입을 먼저 해주세요'}, 400
-        if password != user[0].password:
+        if data['password'] != user.password:
             return {'message': '패스워드가 일치하지않습니다.'}, 400
 
         # 토큰 발급
         token = {
-            'access_token': create_access_token(identity=str(user[0].id)),
-            'refresh_token': create_refresh_token(identity=str(user[0].id))
+            'access_token': create_access_token(identity=str(user.id)),
+            'refresh_token': create_refresh_token(identity=str(user.id))
         }
         return jsonify(token), 200
 
@@ -61,13 +62,15 @@ class UserView(FlaskView):
     def patch(self):
         user = User.objects.get(id=get_jwt_identity())
 
-        username = request.json['username']
-        password = request.json['password']
+        try:
+            data = UserSchema().load(request.json)
+        except ValidationError as err:
+            return err.messages, 400
 
-        if username:
-            user.modify(username=username)
-        if password:
-            user.modify(password=password)
+        if data['username']:
+            user.modify(username=data['username'])
+        if data['password']:
+            user.modify(password=data['password'])
         return UserSchema().dump(user)
 
     # 사용자 삭제

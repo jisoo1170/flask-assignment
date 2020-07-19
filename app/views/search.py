@@ -12,4 +12,4 @@ class SearchView(FlaskView):
         if not tag:
             return {'error': '검색어를 입력해주세요'}, 400
         boards = Board.objects(tags=tag.lower())
-        return BoardSchema(exclude=['likes']).dump(boards, many=True), 200
+        return BoardSchema(exclude=['user', 'likes']).dump(boards, many=True), 200

@@ -1,4 +1,4 @@
-from mongoengine import Document, EmbeddedDocument, fields
+from mongoengine import Document, EmbeddedDocument, fields, CASCADE
 from bson import ObjectId
 
 from .user import User
@@ -13,7 +13,7 @@ class Recomment(EmbeddedDocument):
 
 class Comment(Document):
     board_id = fields.StringField()
-    user = fields.ReferenceField(User)
+    user = fields.ReferenceField(User, reverse_delete_rule=CASCADE)
     content = fields.StringField()
     recomments = fields.EmbeddedDocumentListField(Recomment)
     likes = fields.ListField(fields.StringField())

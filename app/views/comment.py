@@ -2,6 +2,7 @@ from flask_classful import FlaskView, route
 from flask import request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
+from app.models.board import Board
 from app.models.comment import Comment, Recomment
 from app.models.user import User
 from app.serailziers.comment import CommentSchema, RecommentSchema
@@ -11,6 +12,11 @@ class CommentView(FlaskView):
     route_base = 'board/<board_id>/comment'
 
     def index(self, board_id):
+        try:
+            Board.objects.get(id=board_id)
+        except Exception:
+            return {'error': '존재하지 않는 게시글입니다.'}, 404
+
         comments = Comment.objects(board_id=board_id)
         return CommentSchema().dump(comments, many=True), 200
 

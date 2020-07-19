@@ -3,6 +3,7 @@ from flask import request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from app.models.board import Board
+from app.models.comment import Comment
 from app.models.user import User
 from app.serailziers.board import BoardSchema
 
@@ -13,7 +14,7 @@ class BoardView(FlaskView):
         order = request.args.get('order')
         if order:
             boards = boards.order_by('-'+order)
-        return BoardSchema(exclude=['user', 'likes', 'tags'], many=True).dump(boards), 200
+        return BoardSchema(exclude=['user', 'likes', 'tags']).dump(boards, many=True), 200
 
     def get(self, board_id):
         try:
@@ -64,6 +65,9 @@ class BoardView(FlaskView):
         # 권한 확인
         if board.user != user:
             return {'error': '권한이 없습니다'}, 401
+
+        # 게시글에 달린 댓글 삭제
+        Comment.objects(board_id=id).delete()
 
         board.delete()
         return {'message': '삭제 완료!'}, 204

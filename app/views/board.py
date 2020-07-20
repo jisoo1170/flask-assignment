@@ -16,13 +16,9 @@ class BoardView(FlaskView):
         if order:
             boards = boards.order_by('-'+order)
         return jsonify(get_paginated_list(
-            model='boards',
-            results=boards,
-            schema=BoardSchema(exclude=['likes', 'tags']),
-            url='/board',
-            order=order,
-            start=int(request.args.get('start', 1)),
-            limit=15
+            model='boards', results=boards, schema=BoardSchema(exclude=['likes']),
+            url='/board', params='&order=%s'%order,
+            start=int(request.args.get('start', 1)), limit=15
         )), 200
 
     def get(self, board_id):
@@ -48,7 +44,7 @@ class BoardView(FlaskView):
         user = User.objects.get(id=get_jwt_identity())
         # 권한 확인
         if board.user != user:
-            return {'error': '권한이 없습니다'}, 401
+            return {'message': '권한이 없습니다'}, 401
 
         try:
             data = BoardSchema().load(request.json)
@@ -64,7 +60,7 @@ class BoardView(FlaskView):
         user = User.objects.get(id=get_jwt_identity())
         # 권한 확인
         if board.user != user:
-            return {'error': '권한이 없습니다'}, 401
+            return {'message': '권한이 없습니다'}, 401
 
         board.delete()
         return {}, 204
@@ -81,3 +77,16 @@ class BoardView(FlaskView):
             board.modify(add_to_set__likes=[user])
         board.modify(num_of_likes=len(board.likes))
         return BoardSchema().dump(board), 200
+
+    @route('/search')
+    def search(self):
+        # query params
+        tag = request.args.get('tag')
+        if not tag:
+            return {'error': '검색어를 입력해주세요'}, 400
+        boards = Board.objects(tags=tag.lower())
+        return jsonify(get_paginated_list(
+            model='boards', results=boards, schema=BoardSchema(exclude=['likes']),
+            url='/search', params='&tag=%s'%tag,
+            start=int(request.args.get('start', 1)), limit=15
+        )), 200

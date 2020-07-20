@@ -16,16 +16,15 @@ class UserView(FlaskView):
     @route('/signup', methods=['POST'])
     def signup(self):
         try:
-            data = UserSchema().load(request.json)
+            user = UserSchema().load(request.json)
         except ValidationError as err:
             return err.messages, 400
 
         # 유효성 검사
-        if User.objects(username=data['username']):
+        if User.objects(username=user.username):
             return {'message': '존재하는 닉네임입니다.'}, 400
 
         # 사용자 저장
-        user = User(**data)
         user.save()
         return UserSchema().dump(user), 201
 
@@ -67,10 +66,10 @@ class UserView(FlaskView):
         except ValidationError as err:
             return err.messages, 400
 
-        if data['username']:
-            user.modify(username=data['username'])
-        if data['password']:
-            user.modify(password=data['password'])
+        if data.username:
+            user.modify(username=data.username)
+        if data.password:
+            user.modify(password=data.password)
         return UserSchema().dump(user)
 
     # 사용자 삭제

@@ -1,7 +1,6 @@
-from marshmallow import fields, Schema, post_dump, post_load
+from marshmallow import fields, Schema, post_dump
 
 from .user import UserSchema
-from app.models.board import Board
 
 
 fields.Field.default_error_messages["required"] = "필수 항목 입니다"
@@ -21,7 +20,3 @@ class BoardSchema(Schema):
     def wrap(self, data, many, **kwargs):
         key = "boards" if many else "board"
         return {key: data}
-
-    @post_load
-    def make_board(self, data, **kwargs):
-        return Board(**data)

@@ -2,9 +2,9 @@ from flask_classful import FlaskView, route
 from flask import request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from marshmallow import ValidationError
+from mongoengine import DoesNotExist
 
 from app.models.board import Board
-from app.models.comment import Comment
 from app.models.user import User
 from app.serailziers.board import BoardSchema
 
@@ -15,25 +15,25 @@ class BoardView(FlaskView):
         order = request.args.get('order')
         if order:
             boards = boards.order_by('-'+order)
-        return BoardSchema(exclude=['user', 'likes', 'tags']).dump(boards, many=True), 200
+        return BoardSchema(exclude=['likes', 'tags']).dump(boards, many=True), 200
 
     def get(self, board_id):
         try:
             board = Board.objects.get(id=board_id)
             board.modify(inc__num_of_views=1)
             return BoardSchema().dump(board), 200
-        except Exception:
+        except DoesNotExist:
             return {'error': '존재하지 않는 게시글입니다.'}, 404
 
     @jwt_required
     def post(self):
         user = User.objects.get(id=get_jwt_identity())
         try:
-            board = BoardSchema().load(request.json)
+            data = BoardSchema().load(request.json)
         except ValidationError as err:
             return err.messages, 400
 
-        board.user = user
+        board = Board(user=user, **data)
         board.save()
         return BoardSchema().dump(board), 201
 
@@ -41,7 +41,7 @@ class BoardView(FlaskView):
     def put(self, id):
         try:
             board = Board.objects.get(id=id)
-        except Exception:
+        except DoesNotExist:
             return {'error': '존재하지 않는 게시글입니다.'}, 404
 
         user = User.objects.get(id=get_jwt_identity())
@@ -55,14 +55,14 @@ class BoardView(FlaskView):
         except ValidationError as err:
             err.messages, 400
 
-        board.modify(title=data.title, content=data.title, tags=data.tags)
+        board.modify(**data)
         return BoardSchema().dump(board), 200
 
     @jwt_required
     def delete(self, id):
         try:
             board = Board.objects.get(id=id)
-        except Exception:
+        except DoesNotExist:
             return {'error': '존재하지 않는 게시글입니다.'}, 404
         user = User.objects.get(id=get_jwt_identity())
 
@@ -71,14 +71,14 @@ class BoardView(FlaskView):
             return {'error': '권한이 없습니다'}, 401
 
         board.delete()
-        return {'message': '삭제 완료!'}, 204
+        return {}, 204
 
     @jwt_required
     @route('/<id>/like', methods=['POST'])
     def like(self, id):
         try:
             board = Board.objects.get(id=id)
-        except Exception:
+        except DoesNotExist:
             return {'error': '존재하지 않는 게시글입니다.'}, 404
         user = User.objects.get(id=get_jwt_identity())
 

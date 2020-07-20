@@ -1,6 +1,8 @@
 from flask_classful import FlaskView, route
 from flask import request
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from marshmallow import ValidationError
+from mongoengine import DoesNotExist
 
 from app.models.board import Board
 from app.models.comment import Comment, Recomment
@@ -14,7 +16,7 @@ class CommentView(FlaskView):
     def index(self, board_id):
         try:
             Board.objects.get(id=board_id)
-        except Exception:
+        except DoesNotExist:
             return {'error': '존재하지 않는 게시글입니다.'}, 404
 
         comments = Comment.objects(board_id=board_id)
@@ -22,9 +24,14 @@ class CommentView(FlaskView):
 
     @jwt_required
     def post(self, board_id):
-        user = User.objects.get(id=get_jwt_identity())
+        try:
+            data = CommentSchema().load(request.json)
+        except ValidationError as err:
+            return err.messages, 400
 
-        comment = Comment(board_id=board_id, user=user, content=request.json['content'])
+        user = User.objects.get(id=get_jwt_identity())
+        print(board_id)
+        comment = Comment(user=user, board_id=board_id, **data)
         comment.save()
         return CommentSchema().dump(comment), 201
 
@@ -32,21 +39,26 @@ class CommentView(FlaskView):
     def put(self, board_id, id):
         try:
             comment = Comment.objects.get(id=id)
-        except Exception:
+        except DoesNotExist:
             return {'error': '존재하지 않는 댓글입니다.'}, 404
 
         user = User.objects.get(id=get_jwt_identity())
         if comment.user != user:
             return {'error': '권한이 없습니다'}, 401
 
-        comment.modify(content=request.json['content'])
+        try:
+            data = CommentSchema().load(request.json)
+        except ValidationError as err:
+            return err.messages, 400
+
+        comment.modify(**data)
         return CommentSchema().dump(comment), 200
 
     @jwt_required
     def delete(self, board_id, id):
         try:
             comment = Comment.objects.get(id=id)
-        except Exception:
+        except DoesNotExist:
             return {'error': '존재하지 않는 댓글입니다.'}, 404
 
         user = User.objects.get(id=get_jwt_identity())
@@ -55,19 +67,18 @@ class CommentView(FlaskView):
             return {'error': '권한이 없습니다'}, 401
 
         comment.delete()
-        return {'message': '삭제 완료!'}, 200
+        return {}, 204
 
     @jwt_required
     @route('/<id>/like', methods=['POST'])
     def like(self, board_id, id):
         try:
             comment = Comment.objects.get(id=id)
-        except Exception:
+        except DoesNotExist:
             return {'error': '존재하지 않는 댓글입니다.'}, 404
 
         user = User.objects.get(id=get_jwt_identity())
         # 이미 좋아요를 누른 경우 좋아요 취소
-        print(comment.likes)
         if user in comment.likes:
             comment.modify(pull__likes=user)
         else:
@@ -82,7 +93,11 @@ class RecommentView(FlaskView):
     @jwt_required
     def post(self, board_id, comment_id):
         user = User.objects.get(id=get_jwt_identity())
-        recomment = Recomment(user=user, comment_id=comment_id, content=request.json['content'])
+        try:
+            data = RecommentSchema().load(request.json)
+        except ValidationError as err:
+            return err.messages, 400
+        recomment = Recomment(user=user, comment_id=comment_id, **data)
         recomment.save()
         return RecommentSchema().dump(recomment), 201
 
@@ -90,21 +105,25 @@ class RecommentView(FlaskView):
     def put(self, board_id, comment_id, id):
         try:
             recomment = Recomment.objects.get(id=id)
-        except Exception:
+        except DoesNotExist:
             return {'error': '존재하지 않는 대댓글입니다.'}, 404
 
         user = User.objects.get(id=get_jwt_identity())
         if recomment.user != user:
             return {'error': '권한이 없습니다'}, 401
 
-        recomment.modify(content=request.json['content'])
+        try:
+            data = RecommentSchema().load(request.json)
+        except ValidationError as err:
+            return err.messages, 400
+        recomment.modify(**data)
         return RecommentSchema().dump(recomment), 200
 
     @jwt_required
     def delete(self, board_id, comment_id, id):
         try:
-            recomment = Recomment.get(id=id)
-        except Exception:
+            recomment = Recomment.objects.get(id=id)
+        except DoesNotExist:
             return {'error': '존재하지 않는 대댓글입니다.'}, 404
 
         user = User.objects.get(id=get_jwt_identity())
@@ -113,14 +132,14 @@ class RecommentView(FlaskView):
             return {'error': '권한이 없습니다'}, 401
 
         recomment.delete()
-        return {'message': '삭제 완료!'}, 204
+        return {}, 204
 
     @jwt_required
     @route('/<id>/like', methods=['POST'])
     def like(self, board_id, comment_id, id):
         try:
             recomment = Recomment.objects.get(id=id)
-        except Exception:
+        except DoesNotExist:
             return {'error': '존재하지 않는 대댓글입니다.'}, 404
 
         user = User.objects.get(id=get_jwt_identity())

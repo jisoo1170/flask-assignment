@@ -10,7 +10,3 @@ class UserSchema(Schema):
     id = fields.Str()
     username = fields.String(required=True)
     password = fields.String(load_only=True, required=True)
-
-    @post_load
-    def make_user(self, data, **kwargs):
-        return User(**data)

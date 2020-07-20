@@ -1,5 +1,4 @@
 from marshmallow import fields, Schema, post_dump
-from marshmallow.fields import Method
 
 from .user import UserSchema
 from app.models.comment import Recomment

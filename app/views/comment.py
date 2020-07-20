@@ -19,7 +19,7 @@ class CommentView(FlaskView):
         except DoesNotExist:
             return {'error': '존재하지 않는 게시글입니다.'}, 404
 
-        comments = Comment.objects(board_id=board_id)
+        comments = Comment.objects(board_id=board_id).order_by('-num_of_likes')
         return CommentSchema().dump(comments, many=True), 200
 
     @jwt_required

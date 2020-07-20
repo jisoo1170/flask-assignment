@@ -42,7 +42,7 @@ class UserView(FlaskView):
         # 유효성 검사
         user = User.objects.get(username=data['username'])
         if not user:
-            return {'message': '회원가입을 먼저 해주세요'}, 400
+            return {'message': '회원가입을 먼저 해주세요'}, 404
         if data['password'] != user.password:
             return {'message': '패스워드가 일치하지않습니다.'}, 400
 
@@ -63,12 +63,10 @@ class UserView(FlaskView):
     @jwt_required
     def patch(self):
         user = User.objects.get(id=get_jwt_identity())
-
         try:
             data = UserSchema().load(request.json)
         except ValidationError as err:
             return err.messages, 400
-
         if data['username']:
             user.modify(username=data['username'])
         if data['password']:
@@ -86,13 +84,12 @@ class UserView(FlaskView):
     @route('/board')
     def board(self):
         boards = Board.objects(user=get_jwt_identity())
-
         return jsonify(get_paginated_list(
-            'boards',
-            boards,
-            BoardSchema(only=("id", "title", "content")),
-            '/user/board',
-            '',
+            model='boards',
+            results=boards,
+            schema=BoardSchema(only=("id", "title", "content")),
+            url='/user/board',
+            order='',
             start=int(request.args.get('start', 1)),
             limit=int(request.args.get('limit', 10))
         )), 200
@@ -102,13 +99,12 @@ class UserView(FlaskView):
     @route('/comment')
     def comment(self):
         comments = Comment.objects(user=get_jwt_identity())
-
         return jsonify(get_paginated_list(
-            'comments',
-            comments,
-            CommentSchema(only=("id", "content")),
-            '/user/comment',
-            '',
+            model='comments',
+            results=comments,
+            schema=CommentSchema(only=("id", "content")),
+            url='/user/comment',
+            order='',
             start=int(request.args.get('start', 1)),
             limit=int(request.args.get('limit', 10))
         )), 200
@@ -118,13 +114,12 @@ class UserView(FlaskView):
     @route('/recomment')
     def recomment(self):
         recomments = Recomment.objects(user=get_jwt_identity())
-
         return jsonify(get_paginated_list(
-            'recomments',
-            recomments,
-            RecommentSchema(only=("id", "content")),
-            '/user/recomment',
-            '',
+            model='recomments',
+            results=recomments,
+            schema=RecommentSchema(only=("id", "content")),
+            url='/user/recomment',
+            order='',
             start=int(request.args.get('start', 1)),
             limit=int(request.args.get('limit', 10))
         )), 200
@@ -133,14 +128,13 @@ class UserView(FlaskView):
     @jwt_required
     @route('/like')
     def like(self):
-        user = User.objects.get(id=get_jwt_identity())
         boards = Board.objects(likes__in=[get_jwt_identity()])
         return jsonify(get_paginated_list(
-            'boards',
-            boards,
-            BoardSchema(only=("id", "title", "content")),
-            '/user/like',
-            '',
+            model='boards',
+            results=boards,
+            schema=BoardSchema(only=("id", "title", "content")),
+            url='/user/like',
+            order='',
             start=int(request.args.get('start', 1)),
             limit=int(request.args.get('limit', 10))
         )), 200

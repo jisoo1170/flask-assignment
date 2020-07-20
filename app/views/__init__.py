@@ -1,11 +1,8 @@
-from os import abort
-
-
-def get_paginated_list(model_name, results, schema, url, order, start, limit):
+def get_paginated_list(model, results, schema, url, order, start, limit):
     # check if page exists
     count = len(results)
     if count < start:
-        return {model_name: []}
+        return {model: []}
     # make response
     obj = {'start': start, 'limit': limit, 'count': count}
     # make URLs
@@ -15,7 +12,7 @@ def get_paginated_list(model_name, results, schema, url, order, start, limit):
     else:
         start_copy = max(1, start - limit)
         limit_copy = start - 1
-        obj['previous'] = url + '?start=%d&limit=%d' % (start_copy, limit_copy)
+        obj['previous'] = url + '?start=%d' % start_copy
         if order:
             obj['previous'] = obj['previous'] + '&order=%s' % order
     # make next url
@@ -23,11 +20,11 @@ def get_paginated_list(model_name, results, schema, url, order, start, limit):
         obj['next'] = ''
     else:
         start_copy = start + limit
-        obj['next'] = url + '?start=%d&limit=%d' % (start_copy, limit)
+        obj['next'] = url + '?start=%d' % start_copy
         if order:
             obj['next'] = obj['next'] + '&order=%s' % order
 
     # finally extract result according to bounds
     results = results[(start - 1):(start - 1 + limit)]
-    obj[model_name] = schema.dump(results, many=True)
+    obj[model] = schema.dump(results, many=True)
     return obj

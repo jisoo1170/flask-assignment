@@ -2,7 +2,6 @@ from flask_classful import FlaskView, route
 from flask import request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from marshmallow import ValidationError
-from mongoengine import DoesNotExist
 
 from app.models.board import Board
 from app.models.user import User
@@ -17,22 +16,19 @@ class BoardView(FlaskView):
         if order:
             boards = boards.order_by('-'+order)
         return jsonify(get_paginated_list(
-            'boards',
-            boards,
-            BoardSchema(exclude=['likes', 'tags']),
-            '/board',
-            order,
+            model='boards',
+            results=boards,
+            schema=BoardSchema(exclude=['likes', 'tags']),
+            url='/board',
+            order=order,
             start=int(request.args.get('start', 1)),
-            limit=int(request.args.get('limit', 10))
+            limit=15
         )), 200
 
     def get(self, board_id):
-        # try:
         board = Board.objects.get_or_404(id=board_id)
         board.modify(inc__num_of_views=1)
         return BoardSchema().dump(board), 200
-        # except DoesNotExist:
-        #     return {'error': '존재하지 않는 게시글입니다.'}, 404
 
     @jwt_required
     def post(self):
@@ -48,13 +44,8 @@ class BoardView(FlaskView):
 
     @jwt_required
     def put(self, id):
-        try:
-            board = Board.objects.get(id=id)
-        except DoesNotExist:
-            return {'error': '존재하지 않는 게시글입니다.'}, 404
-
+        board = Board.objects.get_or_404(id=id)
         user = User.objects.get(id=get_jwt_identity())
-
         # 권한 확인
         if board.user != user:
             return {'error': '권한이 없습니다'}, 401
@@ -69,12 +60,8 @@ class BoardView(FlaskView):
 
     @jwt_required
     def delete(self, id):
-        try:
-            board = Board.objects.get(id=id)
-        except DoesNotExist:
-            return {'error': '존재하지 않는 게시글입니다.'}, 404
+        board = Board.objects.get_or_404(id=id)
         user = User.objects.get(id=get_jwt_identity())
-
         # 권한 확인
         if board.user != user:
             return {'error': '권한이 없습니다'}, 401
@@ -85,12 +72,8 @@ class BoardView(FlaskView):
     @jwt_required
     @route('/<id>/like', methods=['POST'])
     def like(self, id):
-        try:
-            board = Board.objects.get(id=id)
-        except DoesNotExist:
-            return {'error': '존재하지 않는 게시글입니다.'}, 404
+        board = Board.objects.get_or_404(id=id)
         user = User.objects.get(id=get_jwt_identity())
-
         # 이미 좋아요를 누른 경우 좋아요 취소
         if user in board.likes:
             board.modify(pull__likes=user)

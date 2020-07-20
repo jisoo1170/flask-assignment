@@ -1,4 +1,5 @@
-from mongoengine import Document, fields, CASCADE
+from mongoengine import fields, CASCADE
+from flask_mongoengine import Document
 
 from .user import User
 

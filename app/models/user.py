@@ -1,4 +1,5 @@
-from mongoengine import Document, fields
+from mongoengine import fields
+from flask_mongoengine import Document
 
 
 class User(Document):

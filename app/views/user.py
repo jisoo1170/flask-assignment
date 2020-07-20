@@ -85,13 +85,9 @@ class UserView(FlaskView):
     def board(self):
         boards = Board.objects(user=get_jwt_identity())
         return jsonify(get_paginated_list(
-            model='boards',
-            results=boards,
-            schema=BoardSchema(only=("id", "title", "content")),
-            url='/user/board',
-            order='',
-            start=int(request.args.get('start', 1)),
-            limit=int(request.args.get('limit', 10))
+            model='boards', results=boards, schema=BoardSchema(only=("id", "title", "content")),
+            url='/user/board', params='',
+            start=int(request.args.get('start', 1)), limit=15
         )), 200
 
     # 내가 작성한 댓글 보기
@@ -100,13 +96,9 @@ class UserView(FlaskView):
     def comment(self):
         comments = Comment.objects(user=get_jwt_identity())
         return jsonify(get_paginated_list(
-            model='comments',
-            results=comments,
-            schema=CommentSchema(only=("id", "content")),
-            url='/user/comment',
-            order='',
-            start=int(request.args.get('start', 1)),
-            limit=int(request.args.get('limit', 10))
+            model='comments', results=comments, schema=CommentSchema(only=("id", "content")),
+            url='/user/comment', params='',
+            start=int(request.args.get('start', 1)), limit=15
         )), 200
 
     # 내가 작성한 대댓글 보기
@@ -115,13 +107,9 @@ class UserView(FlaskView):
     def recomment(self):
         recomments = Recomment.objects(user=get_jwt_identity())
         return jsonify(get_paginated_list(
-            model='recomments',
-            results=recomments,
-            schema=RecommentSchema(only=("id", "content")),
-            url='/user/recomment',
-            order='',
-            start=int(request.args.get('start', 1)),
-            limit=int(request.args.get('limit', 10))
+            model='recomments', results=recomments, schema=RecommentSchema(only=("id", "content")),
+            url='/user/recomment', params='',
+            start=int(request.args.get('start', 1)), limit=15
         )), 200
 
     # 좋아요 한 게시글 보기
@@ -130,11 +118,7 @@ class UserView(FlaskView):
     def like(self):
         boards = Board.objects(likes__in=[get_jwt_identity()])
         return jsonify(get_paginated_list(
-            model='boards',
-            results=boards,
-            schema=BoardSchema(only=("id", "title", "content")),
-            url='/user/like',
-            order='',
-            start=int(request.args.get('start', 1)),
-            limit=int(request.args.get('limit', 10))
+            model='boards', results=boards, schema=BoardSchema(only=("id", "title", "content")),
+            url='/user/like', params='',
+            start=int(request.args.get('start', 1)), limit=15
         )), 200

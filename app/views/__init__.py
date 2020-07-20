@@ -1,4 +1,4 @@
-def get_paginated_list(model, results, schema, url, order, start, limit):
+def get_paginated_list(model, results, schema, url, params, start, limit):
     # check if page exists
     count = len(results)
     if count < start:
@@ -12,17 +12,13 @@ def get_paginated_list(model, results, schema, url, order, start, limit):
     else:
         start_copy = max(1, start - limit)
         limit_copy = start - 1
-        obj['previous'] = url + '?start=%d' % start_copy
-        if order:
-            obj['previous'] = obj['previous'] + '&order=%s' % order
+        obj['previous'] = url + '?start=%d' % start_copy + params
     # make next url
     if start + limit > count:
         obj['next'] = ''
     else:
         start_copy = start + limit
-        obj['next'] = url + '?start=%d' % start_copy
-        if order:
-            obj['next'] = obj['next'] + '&order=%s' % order
+        obj['next'] = url + '?start=%d' % start_copy + params
 
     # finally extract result according to bounds
     results = results[(start - 1):(start - 1 + limit)]

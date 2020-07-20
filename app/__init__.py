@@ -13,12 +13,11 @@ def create_app():
     db = MongoEngine(app)
 
     # api 등록
-    from app.views import board, comment, search, user
+    from app.views import board, comment, user
     user.UserView.register(app)
     board.BoardView.register(app)
     comment.CommentView.register(app)
     comment.RecommentView.register(app)
-    search.SearchView.register(app)
 
     # swagger
     api = Api(app, version='1.0', title='게시판', description='게시 등록,수정,삭제,조회 API입니다')

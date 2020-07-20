@@ -2,7 +2,6 @@ from flask_classful import FlaskView, route
 from flask import request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from marshmallow import ValidationError
-from mongoengine import DoesNotExist
 
 from app.models.board import Board
 from app.models.comment import Comment, Recomment
@@ -18,13 +17,9 @@ class CommentView(FlaskView):
         Board.objects.get_or_404(id=board_id)
         comments = Comment.objects(board_id=board_id).order_by('-num_of_likes')
         return jsonify(get_paginated_list(
-            model='comments',
-            results=comments,
-            schema=CommentSchema(),
-            url='/board/%s/comment' % board_id,
-            order='',
-            start=int(request.args.get_or_404('start', 1)),
-            limit=20
+            model='comments', results=comments, schema=CommentSchema(),
+            url='/board/%s/comment' % board_id, params='',
+            start=int(request.args.get('start', 1)), limit=20
         )), 200
 
     @jwt_required
@@ -33,7 +28,7 @@ class CommentView(FlaskView):
             data = CommentSchema().load(request.json)
         except ValidationError as err:
             return err.messages, 400
-        user = User.objects.get_or_404(id=get_jwt_identity())
+        user = User.objects.get(id=get_jwt_identity())
         comment = Comment(user=user, board_id=board_id, **data)
         comment.save()
         return CommentSchema().dump(comment), 201
@@ -41,7 +36,7 @@ class CommentView(FlaskView):
     @jwt_required
     def put(self, board_id, id):
         comment = Comment.objects.get_or_404(id=id)
-        user = User.objects.get_or_404(id=get_jwt_identity())
+        user = User.objects.get(id=get_jwt_identity())
         if comment.user != user:
             return {'error': '권한이 없습니다'}, 401
         try:
@@ -54,7 +49,7 @@ class CommentView(FlaskView):
     @jwt_required
     def delete(self, board_id, id):
         comment = Comment.objects.get_or_404(id=id)
-        user = User.objects.get_or_404(id=get_jwt_identity())
+        user = User.objects.get(id=get_jwt_identity())
         # 권한 확인
         if comment.user != user:
             return {'error': '권한이 없습니다'}, 401
@@ -65,7 +60,7 @@ class CommentView(FlaskView):
     @route('/<id>/like', methods=['POST'])
     def like(self, board_id, id):
         comment = Comment.objects.get_or_404(id=id)
-        user = User.objects.get_or_404(id=get_jwt_identity())
+        user = User.objects.get(id=get_jwt_identity())
         # 이미 좋아요를 누른 경우 좋아요 취소
         if user in comment.likes:
             comment.modify(pull__likes=user)
@@ -80,7 +75,7 @@ class RecommentView(FlaskView):
 
     @jwt_required
     def post(self, board_id, comment_id):
-        user = User.objects.get_or_404(id=get_jwt_identity())
+        user = User.objects.get4(id=get_jwt_identity())
         try:
             data = RecommentSchema().load(request.json)
         except ValidationError as err:
@@ -92,7 +87,7 @@ class RecommentView(FlaskView):
     @jwt_required
     def put(self, board_id, comment_id, id):
         recomment = Recomment.objects.get_or_404(id=id)
-        user = User.objects.get_or_404(id=get_jwt_identity())
+        user = User.objects.get(id=get_jwt_identity())
         if recomment.user != user:
             return {'error': '권한이 없습니다'}, 401
         try:
@@ -105,7 +100,7 @@ class RecommentView(FlaskView):
     @jwt_required
     def delete(self, board_id, comment_id, id):
         recomment = Recomment.objects.get_or_404(id=id)
-        user = User.objects.get_or_404(id=get_jwt_identity())
+        user = User.objects.get(id=get_jwt_identity())
         if recomment.user != user:
             return {'error': '권한이 없습니다'}, 401
         recomment.delete()
@@ -115,7 +110,7 @@ class RecommentView(FlaskView):
     @route('/<id>/like', methods=['POST'])
     def like(self, board_id, comment_id, id):
         recomment = Recomment.objects.get_or_404(id=id)
-        user = User.objects.get_or_404(id=get_jwt_identity())
+        user = User.objects.get(id=get_jwt_identity())
         # 이미 좋아요를 누른 경우 좋아요 취소
         if user in recomment.likes:
             recomment.modify(pull__likes=user)

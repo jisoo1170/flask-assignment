@@ -10,6 +10,8 @@ from app.serailziers.user import UserSchema
 from app.serailziers.board import BoardSchema
 from app.serailziers.comment import CommentSchema, RecommentSchema
 
+from app.views import get_paginated_list
+
 
 class UserView(FlaskView):
     # 회원가입
@@ -83,33 +85,62 @@ class UserView(FlaskView):
     @jwt_required
     @route('/board')
     def board(self):
-        user = User.objects.get(id=get_jwt_identity())
-        board = Board.objects(user=user)
+        boards = Board.objects(user=get_jwt_identity())
 
-        return BoardSchema(only=("id", "title", "content")).dump(board, many=True), 200
+        return jsonify(get_paginated_list(
+            'boards',
+            boards,
+            BoardSchema(only=("id", "title", "content")),
+            '/user/board',
+            '',
+            start=int(request.args.get('start', 1)),
+            limit=int(request.args.get('limit', 10))
+        )), 200
 
     # 내가 작성한 댓글 보기
     @jwt_required
     @route('/comment')
     def comment(self):
-        user = User.objects.get(id=get_jwt_identity())
-        comment = Comment.objects(user=user)
+        comments = Comment.objects(user=get_jwt_identity())
 
-        return CommentSchema(only=("id", "content")).dump(comment, many=True), 200
+        return jsonify(get_paginated_list(
+            'comments',
+            comments,
+            CommentSchema(only=("id", "content")),
+            '/user/comment',
+            '',
+            start=int(request.args.get('start', 1)),
+            limit=int(request.args.get('limit', 10))
+        )), 200
 
     # 내가 작성한 대댓글 보기
     @jwt_required
     @route('/recomment')
     def recomment(self):
-        user = User.objects.get(id=get_jwt_identity())
-        recomment = Recomment.objects(user=user)
+        recomments = Recomment.objects(user=get_jwt_identity())
 
-        return {"recomments": RecommentSchema(only=("id", "content")).dump(recomment, many=True)}, 200
+        return jsonify(get_paginated_list(
+            'recomments',
+            recomments,
+            RecommentSchema(only=("id", "content")),
+            '/user/recomment',
+            '',
+            start=int(request.args.get('start', 1)),
+            limit=int(request.args.get('limit', 10))
+        )), 200
 
     # 좋아요 한 게시글 보기
     @jwt_required
     @route('/like')
     def like(self):
         user = User.objects.get(id=get_jwt_identity())
-        board = Board.objects(likes__in=[user])
-        return BoardSchema(only=("id", "title", "content")).dump(board, many=True), 200
+        boards = Board.objects(likes__in=[get_jwt_identity()])
+        return jsonify(get_paginated_list(
+            'boards',
+            boards,
+            BoardSchema(only=("id", "title", "content")),
+            '/user/like',
+            '',
+            start=int(request.args.get('start', 1)),
+            limit=int(request.args.get('limit', 10))
+        )), 200

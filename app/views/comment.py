@@ -1,5 +1,5 @@
 from flask_classful import FlaskView, route
-from flask import request
+from flask import request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from marshmallow import ValidationError
 from mongoengine import DoesNotExist
@@ -8,6 +8,7 @@ from app.models.board import Board
 from app.models.comment import Comment, Recomment
 from app.models.user import User
 from app.serailziers.comment import CommentSchema, RecommentSchema
+from app.views import get_paginated_list
 
 
 class CommentView(FlaskView):
@@ -20,7 +21,16 @@ class CommentView(FlaskView):
             return {'error': '존재하지 않는 게시글입니다.'}, 404
 
         comments = Comment.objects(board_id=board_id).order_by('-num_of_likes')
-        return CommentSchema().dump(comments, many=True), 200
+
+        return jsonify(get_paginated_list(
+            'comments',
+            comments,
+            CommentSchema(),
+            '/board/%s/comment' % board_id,
+            '',
+            start=int(request.args.get('start', 1)),
+            limit=int(request.args.get('limit', 3))
+        )), 200
 
     @jwt_required
     def post(self, board_id):

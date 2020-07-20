@@ -17,17 +17,18 @@ class BoardView(FlaskView):
         if order:
             boards = boards.order_by('-'+order)
         return jsonify(get_paginated_list(
+            'boards',
             boards,
             BoardSchema(exclude=['likes', 'tags']),
             '/board',
+            order,
             start=int(request.args.get('start', 1)),
-            limit=int(request.args.get('limit', 3))
-        ))
-        # return BoardSchema(exclude=['likes', 'tags']).dump(boards, many=True), 200
+            limit=int(request.args.get('limit', 10))
+        )), 200
 
     def get(self, board_id):
         # try:
-        board = Board.objects().get_or_404(id=board_id)
+        board = Board.objects.get_or_404(id=board_id)
         board.modify(inc__num_of_views=1)
         return BoardSchema().dump(board), 200
         # except DoesNotExist:

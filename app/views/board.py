@@ -1,6 +1,7 @@
 from flask_classful import FlaskView, route
 from flask import request
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from marshmallow import ValidationError
 
 from app.models.board import Board
 from app.models.comment import Comment
@@ -26,16 +27,15 @@ class BoardView(FlaskView):
 
     @jwt_required
     def post(self):
+        user = User.objects.get(id=get_jwt_identity())
         try:
-            user = get_jwt_identity()
-            title = request.json['title']
-            content = request.json['content']
-            tags = request.json['tags']
-            board = Board(title=title, content=content, user=user, tags=tags)
-            board.save()
-            return BoardSchema().dump(board), 201
-        except Exception:
-            return {'error': '글을 저장하지 못했습니다'}, 404
+            board = BoardSchema().load(request.json)
+        except ValidationError as err:
+            return err.messages, 400
+
+        board.user = user
+        board.save()
+        return BoardSchema().dump(board), 201
 
     @jwt_required
     def put(self, id):
@@ -50,10 +50,12 @@ class BoardView(FlaskView):
         if board.user != user:
             return {'error': '권한이 없습니다'}, 401
 
-        title = request.json['title']
-        content = request.json['content']
-        tags = request.json['tags']
-        board.modify(title=title, content=content, tags=tags)
+        try:
+            data = BoardSchema().load(request.json)
+        except ValidationError as err:
+            err.messages, 400
+
+        board.modify(title=data.title, content=data.title, tags=data.tags)
         return BoardSchema().dump(board), 200
 
     @jwt_required
@@ -67,9 +69,6 @@ class BoardView(FlaskView):
         # 권한 확인
         if board.user != user:
             return {'error': '권한이 없습니다'}, 401
-
-        # 게시글에 달린 댓글 삭제
-        Comment.objects(board_id=id).delete()
 
         board.delete()
         return {'message': '삭제 완료!'}, 204

@@ -16,7 +16,7 @@ class BoardSchema(Schema):
     num_of_likes = fields.Integer(dump_only=True)
     num_of_views = fields.Integer(dump_only=True)
 
-    @post_dump(pass_many=True)
-    def wrap(self, data, many, **kwargs):
-        key = "boards" if many else "board"
-        return {key: data}
+    # @post_dump(pass_many=True)
+    # def wrap(self, data, many, **kwargs):
+    #     key = "boards" if many else "board"
+    #     return {key: data}

@@ -54,9 +54,6 @@ class CommentView(FlaskView):
         if comment.user != user:
             return {'error': '권한이 없습니다'}, 401
 
-        # 댓글에 달린 대댓글 삭제
-        Recomment.objects(comment_id=id).delete()
-
         comment.delete()
         return {'message': '삭제 완료!'}, 200
 
@@ -68,12 +65,13 @@ class CommentView(FlaskView):
         except Exception:
             return {'error': '존재하지 않는 댓글입니다.'}, 404
 
-        user_id = get_jwt_identity()
+        user = User.objects.get(id=get_jwt_identity())
         # 이미 좋아요를 누른 경우 좋아요 취소
-        if user_id in comment.likes:
-            comment.modify(pull__likes=user_id)
+        print(comment.likes)
+        if user in comment.likes:
+            comment.modify(pull__likes=user)
         else:
-            comment.modify(add_to_set__likes=[user_id])
+            comment.modify(add_to_set__likes=[user])
         comment.modify(num_of_likes=len(comment.likes))
         return CommentSchema().dump(comment), 200
 
@@ -125,10 +123,10 @@ class RecommentView(FlaskView):
         except Exception:
             return {'error': '존재하지 않는 대댓글입니다.'}, 404
 
-        user_id = get_jwt_identity()
+        user = User.objects.get(id=get_jwt_identity())
         # 이미 좋아요를 누른 경우 좋아요 취소
-        if user_id in recomment.likes:
-            recomment.modify(pull__likes=user_id)
+        if user in recomment.likes:
+            recomment.modify(pull__likes=user)
         else:
-            recomment.modify(add_to_set__likes=[user_id])
+            recomment.modify(add_to_set__likes=[user])
         return RecommentSchema().dump(recomment), 200

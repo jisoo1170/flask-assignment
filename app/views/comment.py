@@ -38,7 +38,7 @@ class CommentView(FlaskView):
         comment = Comment.objects.get_or_404(id=id)
         user = User.objects.get(id=get_jwt_identity())
         if comment.user != user:
-            return {'message': '권한이 없습니다'}, 401
+            return {'message': '권한이 없습니다'}, 403
         try:
             data = CommentSchema().load(request.json)
         except ValidationError as err:
@@ -52,7 +52,7 @@ class CommentView(FlaskView):
         user = User.objects.get(id=get_jwt_identity())
         # 권한 확인
         if comment.user != user:
-            return {'message': '권한이 없습니다'}, 401
+            return {'message': '권한이 없습니다'}, 403
         comment.delete()
         return {}, 204
 
@@ -72,8 +72,8 @@ class CommentView(FlaskView):
 
 class RecommentView(FlaskView):
     route_base = 'board/<board_id>/comment/<comment_id>/recomment'
+    decorators = [jwt_required]
 
-    @jwt_required
     def post(self, board_id, comment_id):
         user = User.objects.get(id=get_jwt_identity())
         try:
@@ -84,12 +84,11 @@ class RecommentView(FlaskView):
         recomment.save()
         return RecommentSchema().dump(recomment), 201
 
-    @jwt_required
     def patch(self, board_id, comment_id, id):
         recomment = Recomment.objects.get_or_404(id=id)
         user = User.objects.get(id=get_jwt_identity())
         if recomment.user != user:
-            return {'message': '권한이 없습니다'}, 401
+            return {'message': '권한이 없습니다'}, 403
         try:
             data = RecommentSchema().load(request.json)
         except ValidationError as err:
@@ -97,16 +96,14 @@ class RecommentView(FlaskView):
         recomment.modify(**data)
         return RecommentSchema().dump(recomment), 200
 
-    @jwt_required
     def delete(self, board_id, comment_id, id):
         recomment = Recomment.objects.get_or_404(id=id)
         user = User.objects.get(id=get_jwt_identity())
         if recomment.user != user:
-            return {'message': '권한이 없습니다'}, 401
+            return {'message': '권한이 없습니다'}, 403
         recomment.delete()
         return {}, 204
 
-    @jwt_required
     @route('/<id>/like', methods=['POST'])
     def like(self, board_id, comment_id, id):
         recomment = Recomment.objects.get_or_404(id=id)

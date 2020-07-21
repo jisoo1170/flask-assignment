@@ -17,7 +17,7 @@ class BoardView(FlaskView):
             boards = boards.order_by('-'+order)
         return jsonify(get_paginated_list(
             model='boards', results=boards, schema=BoardSchema(exclude=['likes']),
-            url='/board', params='&order=%s'%order,
+            url='/board', params='&order=%s' % order,
             start=int(request.args.get('start', 1)), limit=15
         )), 200
 
@@ -44,7 +44,7 @@ class BoardView(FlaskView):
         user = User.objects.get(id=get_jwt_identity())
         # 권한 확인
         if board.user != user:
-            return {'message': '권한이 없습니다'}, 401
+            return {'message': '권한이 없습니다'}, 403
 
         try:
             data = BoardSchema().load(request.json)
@@ -60,7 +60,7 @@ class BoardView(FlaskView):
         user = User.objects.get(id=get_jwt_identity())
         # 권한 확인
         if board.user != user:
-            return {'message': '권한이 없습니다'}, 401
+            return {'message': '권한이 없습니다'}, 403
 
         board.delete()
         return {}, 204

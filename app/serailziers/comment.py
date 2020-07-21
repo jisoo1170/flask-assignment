@@ -19,7 +19,7 @@ class CommentSchema(Schema):
     user = fields.Nested(UserSchema, only=['username'], dump_only=True)
     content = fields.String(required=True)
     recomments = fields.Method('get_recomments', dump_only=True)
-    num_of_likes = fields.Function(lambda obj: len(obj.likes), dump_only=True)
+    num_of_likes = fields.Integer()
 
     def get_recomments(self, obj):
         return RecommentSchema().dump(Recomment.objects(comment_id=str(obj.id)), many=True)

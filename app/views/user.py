@@ -67,10 +67,9 @@ class UserView(FlaskView):
             data = UserSchema().load(request.json)
         except ValidationError as err:
             return err.messages, 400
-        if data['username']:
-            user.modify(username=data['username'])
-        if data['password']:
-            user.modify(password=data['password'])
+        if User.objects(username=data['username']):
+            return {'message': '존재하는 닉네임입니다.'}, 400
+        user.modify(**data)
         return UserSchema().dump(user)
 
     # 사용자 삭제

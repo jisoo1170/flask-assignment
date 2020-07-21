@@ -34,11 +34,11 @@ class CommentView(FlaskView):
         return CommentSchema().dump(comment), 201
 
     @jwt_required
-    def put(self, board_id, id):
+    def patch(self, board_id, id):
         comment = Comment.objects.get_or_404(id=id)
         user = User.objects.get(id=get_jwt_identity())
         if comment.user != user:
-            return {'error': '권한이 없습니다'}, 401
+            return {'message': '권한이 없습니다'}, 401
         try:
             data = CommentSchema().load(request.json)
         except ValidationError as err:
@@ -52,7 +52,7 @@ class CommentView(FlaskView):
         user = User.objects.get(id=get_jwt_identity())
         # 권한 확인
         if comment.user != user:
-            return {'error': '권한이 없습니다'}, 401
+            return {'message': '권한이 없습니다'}, 401
         comment.delete()
         return {}, 204
 
@@ -75,7 +75,7 @@ class RecommentView(FlaskView):
 
     @jwt_required
     def post(self, board_id, comment_id):
-        user = User.objects.get4(id=get_jwt_identity())
+        user = User.objects.get(id=get_jwt_identity())
         try:
             data = RecommentSchema().load(request.json)
         except ValidationError as err:
@@ -85,11 +85,11 @@ class RecommentView(FlaskView):
         return RecommentSchema().dump(recomment), 201
 
     @jwt_required
-    def put(self, board_id, comment_id, id):
+    def patch(self, board_id, comment_id, id):
         recomment = Recomment.objects.get_or_404(id=id)
         user = User.objects.get(id=get_jwt_identity())
         if recomment.user != user:
-            return {'error': '권한이 없습니다'}, 401
+            return {'message': '권한이 없습니다'}, 401
         try:
             data = RecommentSchema().load(request.json)
         except ValidationError as err:
@@ -102,7 +102,7 @@ class RecommentView(FlaskView):
         recomment = Recomment.objects.get_or_404(id=id)
         user = User.objects.get(id=get_jwt_identity())
         if recomment.user != user:
-            return {'error': '권한이 없습니다'}, 401
+            return {'message': '권한이 없습니다'}, 401
         recomment.delete()
         return {}, 204
 

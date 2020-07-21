@@ -39,7 +39,7 @@ class BoardView(FlaskView):
         return BoardSchema().dump(board), 201
 
     @jwt_required
-    def put(self, id):
+    def patch(self, id):
         board = Board.objects.get_or_404(id=id)
         user = User.objects.get(id=get_jwt_identity())
         # 권한 확인

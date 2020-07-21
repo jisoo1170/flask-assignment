@@ -1,6 +1,4 @@
-from marshmallow import fields, Schema, post_load
-
-from app.models.user import User
+from marshmallow import fields, Schema
 
 
 fields.Field.default_error_messages["required"] = "필수 항목 입니다"

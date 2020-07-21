@@ -12,13 +12,13 @@ def get_paginated_list(model, results, schema, url, params, start, limit):
     else:
         start_copy = max(1, start - limit)
         limit_copy = start - 1
-        obj['previous'] = url + '?start=%d' % start_copy + params
+        obj['previous'] = url + f'?start={start_copy}' + params
     # make next url
     if start + limit > count:
         obj['next'] = ''
     else:
         start_copy = start + limit
-        obj['next'] = url + '?start=%d' % start_copy + params
+        obj['next'] = url + f'?start={start_copy}' + params
 
     # finally extract result according to bounds
     results = results[(start - 1):(start - 1 + limit)]

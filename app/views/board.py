@@ -13,12 +13,14 @@ class BoardView(FlaskView):
     def index(self):
         boards = Board.objects()
         order = request.args.get('order')
+        params = ''
         if order:
-            boards = boards.order_by('-'+order)
+            boards = boards.order_by(f'-{order}')
+            params = f'&order={order}'
         return jsonify(get_paginated_list(
             model='boards', results=boards, schema=BoardSchema(exclude=['likes']),
-            url='/board', params='&order=%s' % order,
-            start=int(request.args.get('start', 1)), limit=15
+            url='/board', params=params,
+            start=int(request.args.get('start', 1)), limit=3
         )), 200
 
     def get(self, board_id):
@@ -89,6 +91,6 @@ class BoardView(FlaskView):
         boards = Board.objects(tags=tag.lower())
         return jsonify(get_paginated_list(
             model='boards', results=boards, schema=BoardSchema(exclude=['likes']),
-            url='/search', params='&tag=%s'%tag,
+            url='/search', params=f'&tag={tag}',
             start=int(request.args.get('start', 1)), limit=15
         )), 200

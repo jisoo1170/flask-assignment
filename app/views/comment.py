@@ -18,7 +18,7 @@ class CommentView(FlaskView):
         comments = Comment.objects(board_id=board_id).order_by('-num_of_likes')
         return jsonify(get_paginated_list(
             model='comments', results=comments, schema=CommentSchema(),
-            url='/board/%s/comment' % board_id, params='',
+            url=f'/board/{board_id}/comment', params='',
             start=int(request.args.get('start', 1)), limit=20
         )), 200
 

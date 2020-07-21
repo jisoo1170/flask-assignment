@@ -31,6 +31,8 @@ class BoardView(FlaskView):
         user = User.objects.get(id=get_jwt_identity())
         try:
             data = BoardSchema().load(request.json)
+            if 'tags' in data:
+                data['tags'] = [x.lower() for x in data['tags']]
         except ValidationError as err:
             return err.messages, 400
 

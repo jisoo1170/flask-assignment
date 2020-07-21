@@ -87,7 +87,7 @@ class BoardView(FlaskView):
         # query params
         tag = request.args.get('tag')
         if not tag:
-            return {'error': '검색어를 입력해주세요'}, 400
+            return {'message': '검색어를 입력해주세요'}, 400
         boards = Board.objects(tags=tag.lower())
         return jsonify(get_paginated_list(
             model='boards', results=boards, schema=BoardSchema(exclude=['likes']),

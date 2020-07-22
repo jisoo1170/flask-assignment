@@ -28,8 +28,7 @@ class CommentView(FlaskView):
             data = CommentSchema().load(request.json)
         except ValidationError as err:
             return err.messages, 400
-        user = User.objects.get(id=get_jwt_identity())
-        comment = Comment(user=user, board_id=board_id, **data)
+        comment = Comment(user=get_jwt_identity(), board_id=board_id, **data)
         comment.save()
         return CommentSchema().dump(comment), 201
 
@@ -75,12 +74,11 @@ class RecommentView(FlaskView):
     decorators = [jwt_required]
 
     def post(self, board_id, comment_id):
-        user = User.objects.get(id=get_jwt_identity())
         try:
             data = RecommentSchema().load(request.json)
         except ValidationError as err:
             return err.messages, 400
-        recomment = Recomment(user=user, comment_id=comment_id, **data)
+        recomment = Recomment(user=get_jwt_identity(), comment_id=comment_id, **data)
         recomment.save()
         return RecommentSchema().dump(recomment), 201
 

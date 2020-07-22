@@ -11,7 +11,6 @@ def get_paginated_list(model, results, schema, url, params, start, limit):
         obj['previous'] = ''
     else:
         start_copy = max(1, start - limit)
-        limit_copy = start - 1
         obj['previous'] = url + f'?start={start_copy}' + params
     # make next url
     if start + limit > count:

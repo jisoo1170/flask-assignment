@@ -30,7 +30,6 @@ class BoardView(FlaskView):
 
     @jwt_required
     def post(self):
-        user = User.objects.get(id=get_jwt_identity())
         try:
             data = BoardSchema().load(request.json)
             if 'tags' in data:
@@ -38,7 +37,7 @@ class BoardView(FlaskView):
         except ValidationError as err:
             return err.messages, 400
 
-        board = Board(user=user, **data)
+        board = Board(user=get_jwt_identity(), **data)
         board.save()
         return BoardSchema().dump(board), 201
 

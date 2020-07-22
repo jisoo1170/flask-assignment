@@ -1,7 +1,7 @@
 def get_paginated_list(model, results, schema, url, params, start, limit):
     # check if page exists
     count = len(results)
-    if count < start:
+    if count == 0:
         return {model: []}
     # make response
     obj = {'start': start, 'limit': limit, 'count': count}

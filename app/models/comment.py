@@ -5,7 +5,7 @@ from .user import User
 
 
 class Comment(Document):
-    board_id = fields.ReferenceField('Board', dbref=False, reverse_delete_rule=CASCADE)
+    board_id = fields.LazyReferenceField('Board', dbref=False, reverse_delete_rule=CASCADE)
     user = fields.ReferenceField(User, reverse_delete_rule=CASCADE)
     content = fields.StringField()
     likes = fields.ListField(fields.ReferenceField(User, dbref=False, reverse_delete_rule=CASCADE))
@@ -13,7 +13,7 @@ class Comment(Document):
 
 
 class Recomment(Document):
-    comment_id = fields.ReferenceField('Comment', dbref=False, reverse_delete_rule=CASCADE)
+    comment_id = fields.LazyReferenceField('Comment', dbref=False, reverse_delete_rule=CASCADE)
     user = fields.ReferenceField(User)
     content = fields.StringField()
     likes = fields.ListField(fields.ReferenceField(User, dbref=False, reverse_delete_rule=CASCADE))

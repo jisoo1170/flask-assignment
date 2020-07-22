@@ -22,7 +22,6 @@ class UserView(FlaskView):
         except ValidationError as err:
             return err.messages, 400
 
-        # 유효성 검사
         if User.objects(username=data['username']):
             return {'message': '존재하는 닉네임입니다.'}, 400
 
@@ -39,7 +38,6 @@ class UserView(FlaskView):
         except ValidationError as err:
             return err.messages, 400
 
-        # 유효성 검사
         user = User.objects.get(username=data['username'])
         if not user:
             return {'message': '회원가입을 먼저 해주세요'}, 404

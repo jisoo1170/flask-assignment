@@ -1,69 +1,77 @@
 from flask_classful import FlaskView, route
-from flask import request
+from flask import request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from marshmallow import ValidationError
 
-from app.models.board import Board, Comment, Recomment
+from app.models.board import Board
 from app.models.user import User
-from app.serailziers.board import BoardSchema, CommentSchema, RecommentSchema
+from app.serailziers.board import BoardSchema
+from app.views import get_paginated_list
 
 
 class BoardView(FlaskView):
     def index(self):
         boards = Board.objects()
         order = request.args.get('order')
+        params = ''
         if order:
-            boards = boards.order_by('-'+order)
-        return BoardSchema(exclude=['comments', 'likes']).dump(boards, many=True), 200
+            boards = boards.order_by(f'-{order}')
+            params = f'&order={order}'
+        return jsonify(get_paginated_list(
+            model='boards', results=boards, schema=BoardSchema(exclude=['likes']),
+            url='/board', params=params,
+            start=int(request.args.get('start', 1)), limit=3
+        )), 200
 
-    def get(self, id):
-        board = Board.objects.get(id=id)
-        return BoardSchema().dump(board)
+    def get(self, board_id):
+        board = Board.objects.get_or_404(id=board_id)
+        board.modify(inc__num_of_views=1)
+        return BoardSchema().dump(board), 200
 
     @jwt_required
     def post(self):
         try:
-            user = get_jwt_identity()
-            title = request.form['title']
-            content = request.form['content']
-            tags = request.form['tags'].lower().replace(' ', '').split(",")
+            data = BoardSchema().load(request.json)
+            if 'tags' in data:
+                data['tags'] = [x.lower() for x in data['tags']]
+        except ValidationError as err:
+            return err.messages, 400
 
-            board = Board(user=user, title=title, content=content, tags=tags)
-            board.save()
-            return BoardSchema().dump(board), 201
-        except Exception:
-            return {'error': '글을 저장하지 못했습니다'}, 404
+        board = Board(user=get_jwt_identity(), **data)
+        board.save()
+        return BoardSchema().dump(board), 201
 
     @jwt_required
-    def put(self, id):
-        board = Board.objects.get(id=id)
+    def patch(self, id):
+        board = Board.objects.get_or_404(id=id)
         user = User.objects.get(id=get_jwt_identity())
-
         # 권한 확인
         if board.user != user:
-            return {'error': '권한이 없습니다'}, 401
+            return {'message': '권한이 없습니다'}, 403
 
-        title = request.form['title']
-        content = request.form['content']
-        tags = request.form['tags'].split(",")
-        board.modify(title=title, content=content, tags=tags)
+        try:
+            data = BoardSchema().load(request.json)
+        except ValidationError as err:
+            err.messages, 400
+
+        board.modify(**data)
         return BoardSchema().dump(board), 200
 
     @jwt_required
     def delete(self, id):
-        board = Board.objects.get(id=id)
+        board = Board.objects.get_or_404(id=id)
         user = User.objects.get(id=get_jwt_identity())
-
         # 권한 확인
         if board.user != user:
-            return {'error': '권한이 없습니다'}, 401
+            return {'message': '권한이 없습니다'}, 403
 
         board.delete()
-        return {'message': '삭제 완료!'}, 200
+        return {}, 204
 
     @jwt_required
-    @route('/<id>/like/', methods=['POST'])
+    @route('/<id>/like', methods=['POST'])
     def like(self, id):
-        board = Board.objects.get(id=id)
+        board = Board.objects.get_or_404(id=id)
         user = User.objects.get(id=get_jwt_identity())
         # 이미 좋아요를 누른 경우 좋아요 취소
         if user in board.likes:
@@ -73,127 +81,15 @@ class BoardView(FlaskView):
         board.modify(num_of_likes=len(board.likes))
         return BoardSchema().dump(board), 200
 
-
-class CommentView(FlaskView):
-    route_base = 'board/<board_id>/comment'
-
-    @jwt_required
-    def post(self, board_id):
-        content = request.form['content']
-        user = User.objects.get(id=get_jwt_identity())
-
-        comment = Comment(user=user, content=content)
-
-        board = Board.objects.get(id=board_id)
-        board.comments.append(comment)
-        board.save()
-        return BoardSchema().dump(board), 201
-
-    @jwt_required
-    def put(self, board_id, id):
-        content = request.form['content']
-        user = User.objects.get(id=get_jwt_identity())
-
-        board = Board.objects.get(id=board_id)
-        comment = board.comments.get(id=id)
-
-        if comment.user != user:
-            return {'error': '권한이 없습니다'}, 401
-
-        comment.content = content
-        board.save()
-
-        return CommentSchema().dump(comment), 200
-
-    @jwt_required
-    def delete(self, board_id, id):
-        user = User.objects.get(id=get_jwt_identity())
-
-        board = Board.objects.get(id=board_id)
-        comment = board.comments.get(id=id)
-
-        # 권한 확인
-        if comment.user != user:
-            return {'error': '권한이 없습니다'}, 401
-
-        board.comments.remove(comment)
-        board.save()
-        return {'message': '삭제 완료!'}, 200
-
-    @jwt_required
-    @route('/<id>/like/', methods=['POST'])
-    def like(self, board_id, id):
-        board = Board.objects.get(id=board_id)
-        comment = board.comments.get(id=id)
-        user_id = get_jwt_identity()
-        # 이미 좋아요를 누른 경우 좋아요 취소
-        if user_id in comment.likes:
-            comment.likes.remove(user_id)
-        else:
-            comment.likes.append(user_id)
-        comment.num_of_likes = len(comment.likes)
-        board.save()
-        return CommentSchema().dump(comment), 200
-
-
-class RecommentView(FlaskView):
-    route_base = 'board/<board_id>/comment/<comment_id>/recomment'
-
-    @jwt_required
-    def post(self, board_id, comment_id):
-        user = User.objects.get(id=get_jwt_identity())
-        content = request.form['content']
-        recomment = Recomment(user=user, content=content)
-
-        board = Board.objects.get(id=board_id)
-        comment = board.comments.get(id=comment_id)
-        comment.recomments.append(recomment)
-        board.save()
-        return BoardSchema().dump(board), 201
-
-    @jwt_required
-    def put(self, board_id, comment_id, id):
-        user = User.objects.get(id=get_jwt_identity())
-        content = request.form['content']
-
-        board = Board.objects.get(id=board_id)
-        recomment = board.comments.get(id=comment_id).recomments.get(id=id)
-
-        if recomment.user != user:
-            return {'error': '권한이 없습니다'}, 401
-
-        recomment.content = content
-        board.save()
-
-        return RecommentSchema().dump(recomment), 200
-
-    @jwt_required
-    def delete(self, board_id, comment_id, id):
-        user = User.objects.get(id=get_jwt_identity())
-
-        board = Board.objects.get(id=board_id)
-        comment = board.comments.get(id=comment_id)
-        recomment = comment.recomments.get(id=id)
-
-        if recomment.user != user:
-            return {'error': '권한이 없습니다'}, 401
-
-        comment.recomments.remove(recomment)
-        board.save()
-        return {'message': '삭제 완료!'}, 200
-
-    @jwt_required
-    @route('/<id>/like/', methods=['POST'])
-    def like(self, board_id, comment_id, id):
-        board = Board.objects.get(id=board_id)
-        # comment = board.comments.get(id=comment_id)
-        recomment = board.comments.get(id=comment_id).recomments.get(id=id)
-        user_id = get_jwt_identity()
-        # 이미 좋아요를 누른 경우 좋아요 취소
-        if user_id in recomment.likes:
-            recomment.likes.remove(user_id)
-        else:
-            recomment.likes.append(user_id)
-        recomment.num_of_likes = len(recomment.likes)
-        board.save()
-        return RecommentSchema().dump(recomment), 200
+    @route('/search')
+    def search(self):
+        # query params
+        tag = request.args.get('tag')
+        if not tag:
+            return {'message': '검색어를 입력해주세요'}, 400
+        boards = Board.objects(tags=tag.lower())
+        return jsonify(get_paginated_list(
+            model='boards', results=boards, schema=BoardSchema(exclude=['likes']),
+            url='/search', params=f'&tag={tag}',
+            start=int(request.args.get('start', 1)), limit=15
+        )), 200

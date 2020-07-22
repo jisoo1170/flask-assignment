@@ -1,53 +1,53 @@
 from flask_classful import FlaskView, route
 from flask import request, jsonify
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt_identity
+from marshmallow import ValidationError
 
 from app.models.user import User
 from app.models.board import Board
+from app.models.comment import Comment, Recomment
 from app.serailziers.user import UserSchema
-from app.serailziers.board import BoardSchema, CommentSchema, RecommentSchema
+from app.serailziers.board import BoardSchema
+from app.serailziers.comment import CommentSchema, RecommentSchema
+
+from app.views import get_paginated_list
 
 
 class UserView(FlaskView):
     # 회원가입
     @route('/signup', methods=['POST'])
     def signup(self):
-        username = request.form['username']
-        password1 = request.form['password1']
-        password2 = request.form['password2']
+        try:
+            data = UserSchema().load(request.json)
+        except ValidationError as err:
+            return err.messages, 400
 
-        # 유효성 검사
-        if User.objects(username=username):
+        if User.objects(username=data['username']):
             return {'message': '존재하는 닉네임입니다.'}, 400
-        if password1 != password2:
-            return {'message': '패스워드가 일치하지않습니다.'}, 400
-
-        # 비밀번호 암호화
-        # password = generate_password_hash('password1')
 
         # 사용자 저장
-        user = User(username=username, password=password1)
+        user = User(**data)
         user.save()
-        return {'message': '회원가입 완료!'}, 201
+        return UserSchema().dump(user), 201
 
     # 로그인
     @route('/login', methods=['POST'])
     def login(self):
-        username = request.form['username']
-        password = request.form['password']
+        try:
+            data = UserSchema().load(request.json)
+        except ValidationError as err:
+            return err.messages, 400
 
-        # 유효성 검사
-        user = User.objects(username=username)
+        user = User.objects.get(username=data['username'])
         if not user:
-            return {'message': '회원가입을 먼저 해주세요'}, 400
-        # if not check_password_hash(user[0].password, password):
-        if password != user[0].password:
+            return {'message': '회원가입을 먼저 해주세요'}, 404
+        if data['password'] != user.password:
             return {'message': '패스워드가 일치하지않습니다.'}, 400
 
         # 토큰 발급
         token = {
-            'access_token': create_access_token(identity=str(user[0].id)),
-            'refresh_token': create_refresh_token(identity=str(user[0].id))
+            'access_token': create_access_token(identity=str(user.id)),
+            'refresh_token': create_refresh_token(identity=str(user.id))
         }
         return jsonify(token), 200
 
@@ -61,67 +61,61 @@ class UserView(FlaskView):
     @jwt_required
     def patch(self):
         user = User.objects.get(id=get_jwt_identity())
-        username = request.values.get('username')
-        password = request.values.get('password')
-
-        if username:
-            user.modify(username=username)
-        if password:
-            user.modify(password=password)
+        try:
+            data = UserSchema().load(request.json)
+        except ValidationError as err:
+            return err.messages, 400
+        if User.objects(username=data['username']):
+            return {'message': '존재하는 닉네임입니다.'}, 400
+        user.modify(**data)
         return UserSchema().dump(user)
 
     # 사용자 삭제
     @jwt_required
     def delete(self):
-        User.objects.get(id=get_jwt_identity())
-        return {'message': '삭제 완료!'}, 200
+        User.objects.get(id=get_jwt_identity()).delete()
+        return {}, 204
 
     # 내가 작성한 글 보기
     @jwt_required
     @route('/board')
     def board(self):
-        user = User.objects.get(id=get_jwt_identity())
-        board = Board.objects(user=user)
-
-        schema = BoardSchema(only=("id", "title", "content"))
-        return schema.dump(board, many=True), 200
+        boards = Board.objects(user=get_jwt_identity())
+        return jsonify(get_paginated_list(
+            model='boards', results=boards, schema=BoardSchema(only=("id", "title", "content")),
+            url='/user/board', params='',
+            start=int(request.args.get('start', 1)), limit=15
+        )), 200
 
     # 내가 작성한 댓글 보기
     @jwt_required
     @route('/comment')
     def comment(self):
-        user = User.objects.get(id=get_jwt_identity())
-        board = Board.objects(comments__user=user)
-        comments = []
-        for b in board:
-            comments += b.comments.filter(user=user)
-
-        schema = CommentSchema(only=("id", "content"))
-        result = schema.dump(comments, many=True)
-        return {"comments": result}, 200
+        comments = Comment.objects(user=get_jwt_identity())
+        return jsonify(get_paginated_list(
+            model='comments', results=comments, schema=CommentSchema(only=("id", "content")),
+            url='/user/comment', params='',
+            start=int(request.args.get('start', 1)), limit=15
+        )), 200
 
     # 내가 작성한 대댓글 보기
     @jwt_required
     @route('/recomment')
     def recomment(self):
-        user = User.objects.get(id=get_jwt_identity())
-        board = Board.objects(comments__recomments__user=user)
-
-        recomments = []
-        for b in board:
-            comment = b.comments
-            for c in comment:
-                recomments += c.recomments.filter(user=user)
-
-        schema = RecommentSchema(only=("id", "content"))
-        result = schema.dump(recomments, many=True)
-        return {"recomments": result}, 200
+        recomments = Recomment.objects(user=get_jwt_identity())
+        return jsonify(get_paginated_list(
+            model='recomments', results=recomments, schema=RecommentSchema(only=("id", "content")),
+            url='/user/recomment', params='',
+            start=int(request.args.get('start', 1)), limit=15
+        )), 200
 
     # 좋아요 한 게시글 보기
     @jwt_required
     @route('/like')
     def like(self):
-        user = User.objects.get(id=get_jwt_identity())
-        board = Board.objects(likes__in=[user])
-        schema = BoardSchema(only=("id", "title", "content"))
-        return schema.dump(board, many=True), 200
+        boards = Board.objects(likes__in=[get_jwt_identity()])
+        return jsonify(get_paginated_list(
+            model='boards', results=boards, schema=BoardSchema(only=("id", "title", "content")),
+            url='/user/like', params='',
+            start=int(request.args.get('start', 1)), limit=15
+        )), 200

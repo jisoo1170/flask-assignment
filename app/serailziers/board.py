@@ -3,34 +3,20 @@ from marshmallow import fields, Schema, post_dump
 from .user import UserSchema
 
 
-class RecommentSchema(Schema):
-    id = fields.String()
-    user = fields.Nested(UserSchema, only=['username'])
-    content = fields.String()
-    # likes = fields.List(fields.String())
-    num_of_likes = fields.Function(lambda obj: len(obj.likes))
-
-
-class CommentSchema(Schema):
-    id = fields.String()
-    user = fields.Nested(UserSchema, only=['username'])
-    content = fields.String()
-    recomments = fields.Nested(RecommentSchema, many=True)
-    # likes = fields.List(fields.String())
-    num_of_likes = fields.Function(lambda obj: len(obj.likes))
+fields.Field.default_error_messages["required"] = "필수 항목 입니다"
 
 
 class BoardSchema(Schema):
-    id = fields.String()
-    user = fields.Nested(UserSchema, only=['username'])
-    title = fields.String()
-    content = fields.String()
-    comments = fields.Nested(CommentSchema, many=True)
+    id = fields.String(dump_only=True)
+    user = fields.Nested(UserSchema, only=['username'], dump_only=True)
+    title = fields.String(required=True)
+    content = fields.String(required=True)
     tags = fields.List(fields.String())
-    likes = fields.List(fields.Nested(UserSchema, only=['username']))
-    num_of_likes = fields.Integer()
+    likes = fields.List(fields.Nested(UserSchema, only=['username']), dump_only=True)
+    num_of_likes = fields.Integer(dump_only=True)
+    num_of_views = fields.Integer(dump_only=True)
 
-    @post_dump(pass_many=True)
-    def wrap(self, data, many, **kwargs):
-        key = "boards" if many else "board"
-        return {key: data}
+    # @post_dump(pass_many=True)
+    # def wrap(self, data, many, **kwargs):
+    #     key = "boards" if many else "board"
+    #     return {key: data}

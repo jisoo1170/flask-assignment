@@ -1,29 +1,14 @@
-from mongoengine import Document, EmbeddedDocument, fields
-from bson import ObjectId
+from mongoengine import fields, CASCADE
+from flask_mongoengine import Document
 
 from .user import User
 
 
-class Recomment(EmbeddedDocument):
-    id = fields.ObjectIdField(default=ObjectId)
-    user = fields.ReferenceField(User)
-    content = fields.StringField()
-    likes = fields.ListField(fields.StringField())
-
-
-class Comment(EmbeddedDocument):
-    id = fields.ObjectIdField(default=ObjectId)
-    user = fields.ReferenceField(User)
-    content = fields.StringField()
-    recomments = fields.EmbeddedDocumentListField(Recomment)
-    likes = fields.ListField(fields.StringField())
-
-
 class Board(Document):
-    user = fields.ReferenceField(User)
+    user = fields.ReferenceField(User, reverse_delete_rule=CASCADE, dbref=False)
     title = fields.StringField(max_length=100, required=True)
     content = fields.StringField(required=True)
-    comments = fields.EmbeddedDocumentListField(Comment)
     tags = fields.ListField(fields.StringField(max_length=20))
-    likes = fields.ListField(fields.ReferenceField(User))
+    likes = fields.ListField(fields.ReferenceField(User, reverse_delete_rule=CASCADE, dbref=False))
     num_of_likes = fields.IntField(min_value=0, default=0)
+    num_of_views = fields.IntField(min_value=0, default=0)

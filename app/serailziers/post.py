@@ -6,7 +6,7 @@ from .user import UserSchema
 fields.Field.default_error_messages["required"] = "필수 항목 입니다"
 
 
-class BoardSchema(Schema):
+class PostSchema(Schema):
     id = fields.String(dump_only=True)
     user = fields.Nested(UserSchema, only=['username'], dump_only=True)
     title = fields.String(required=True)

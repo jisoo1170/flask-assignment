@@ -4,7 +4,7 @@ from flask_mongoengine import Document
 from .user import User
 
 
-class Board(Document):
+class Post(Document):
     user = fields.ReferenceField(User, reverse_delete_rule=CASCADE, dbref=False)
     title = fields.StringField(max_length=100, required=True)
     content = fields.StringField(required=True)

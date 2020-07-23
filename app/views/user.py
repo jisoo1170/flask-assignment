@@ -4,10 +4,10 @@ from flask_jwt_extended import jwt_required, create_access_token, create_refresh
 from marshmallow import ValidationError
 
 from app.models.user import User
-from app.models.board import Board
+from app.models.post import Post
 from app.models.comment import Comment, Recomment
 from app.serailziers.user import UserSchema
-from app.serailziers.board import BoardSchema
+from app.serailziers.post import PostSchema
 from app.serailziers.comment import CommentSchema, RecommentSchema
 
 from app.views import get_paginated_list
@@ -23,7 +23,7 @@ class UserView(FlaskView):
             return err.messages, 400
 
         if User.objects(username=data['username']):
-            return {'message': '존재하는 닉네임입니다.'}, 400
+            return {'message': '존재하는 닉네임입니다.'}, 409
 
         # 사용자 저장
         user = User(**data)
@@ -59,6 +59,7 @@ class UserView(FlaskView):
 
     # 정보 수정
     @jwt_required
+    @route('/me')
     def patch(self):
         user = User.objects.get(id=get_jwt_identity())
         try:
@@ -66,30 +67,31 @@ class UserView(FlaskView):
         except ValidationError as err:
             return err.messages, 400
         if User.objects(username=data['username']):
-            return {'message': '존재하는 닉네임입니다.'}, 400
+            return {'message': '존재하는 닉네임입니다.'}, 409
         user.modify(**data)
         return UserSchema().dump(user)
 
     # 사용자 삭제
     @jwt_required
+    @route('/me')
     def delete(self):
         User.objects.get(id=get_jwt_identity()).delete()
         return {}, 204
 
     # 내가 작성한 글 보기
     @jwt_required
-    @route('/board')
+    @route('/me/boards')
     def board(self):
-        boards = Board.objects(user=get_jwt_identity())
+        boards = Post.objects(user=get_jwt_identity())
         return jsonify(get_paginated_list(
-            model='boards', results=boards, schema=BoardSchema(only=("id", "title", "content")),
+            model='boards', results=boards, schema=PostSchema(only=("id", "title", "content")),
             url='/user/board', params='',
             start=int(request.args.get('start', 1)), limit=15
         )), 200
 
     # 내가 작성한 댓글 보기
     @jwt_required
-    @route('/comment')
+    @route('/me/comments')
     def comment(self):
         comments = Comment.objects(user=get_jwt_identity())
         return jsonify(get_paginated_list(
@@ -100,7 +102,7 @@ class UserView(FlaskView):
 
     # 내가 작성한 대댓글 보기
     @jwt_required
-    @route('/recomment')
+    @route('/me/recomments')
     def recomment(self):
         recomments = Recomment.objects(user=get_jwt_identity())
         return jsonify(get_paginated_list(
@@ -111,11 +113,11 @@ class UserView(FlaskView):
 
     # 좋아요 한 게시글 보기
     @jwt_required
-    @route('/like')
+    @route('/me/likes/posts')
     def like(self):
-        boards = Board.objects(likes__in=[get_jwt_identity()])
+        boards = Post.objects(likes__in=[get_jwt_identity()])
         return jsonify(get_paginated_list(
-            model='boards', results=boards, schema=BoardSchema(only=("id", "title", "content")),
+            model='boards', results=boards, schema=PostSchema(only=("id", "title", "content")),
             url='/user/like', params='',
             start=int(request.args.get('start', 1)), limit=15
         )), 200

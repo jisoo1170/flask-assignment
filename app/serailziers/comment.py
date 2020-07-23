@@ -22,7 +22,7 @@ class CommentSchema(Schema):
     num_of_likes = fields.Integer()
 
     def get_recomments(self, obj):
-        return RecommentSchema().dump(Recomment.objects(comment_id=str(obj.id)), many=True)
+        return RecommentSchema().dump(Recomment.objects(comment=str(obj.id)), many=True)
 
     # @post_dump(pass_many=True)
     # def wrap(self, data, many, **kwargs):

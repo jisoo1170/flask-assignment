@@ -80,12 +80,12 @@ class UserView(FlaskView):
 
     # 내가 작성한 글 보기
     @jwt_required
-    @route('/me/boards')
+    @route('/me/posts')
     def board(self):
-        boards = Post.objects(user=get_jwt_identity())
+        posts = Post.objects(user=get_jwt_identity())
         return jsonify(get_paginated_list(
-            model='boards', results=boards, schema=PostSchema(only=("id", "title", "content")),
-            url='/user/board', params='',
+            model='posts', results=posts, schema=PostSchema(only=("id", "title", "content")),
+            url='/users/me/posts', params='',
             start=int(request.args.get('start', 1)), limit=15
         )), 200
 
@@ -96,7 +96,7 @@ class UserView(FlaskView):
         comments = Comment.objects(user=get_jwt_identity())
         return jsonify(get_paginated_list(
             model='comments', results=comments, schema=CommentSchema(only=("id", "content")),
-            url='/user/comment', params='',
+            url='/users/me/comments', params='',
             start=int(request.args.get('start', 1)), limit=15
         )), 200
 
@@ -107,17 +107,17 @@ class UserView(FlaskView):
         recomments = Recomment.objects(user=get_jwt_identity())
         return jsonify(get_paginated_list(
             model='recomments', results=recomments, schema=RecommentSchema(only=("id", "content")),
-            url='/user/recomment', params='',
+            url='/users/me/recomments', params='',
             start=int(request.args.get('start', 1)), limit=15
         )), 200
 
     # 좋아요 한 게시글 보기
     @jwt_required
-    @route('/me/likes/posts')
+    @route('/me/liked-posts')
     def like(self):
         boards = Post.objects(likes__in=[get_jwt_identity()])
         return jsonify(get_paginated_list(
-            model='boards', results=boards, schema=PostSchema(only=("id", "title", "content")),
-            url='/user/like', params='',
+            model='posts', results=boards, schema=PostSchema(only=("id", "title", "content")),
+            url='/users/me/liked-posts', params='',
             start=int(request.args.get('start', 1)), limit=15
         )), 200

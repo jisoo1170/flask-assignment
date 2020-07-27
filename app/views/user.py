@@ -15,7 +15,7 @@ from app.views import get_paginated_list
 
 class UserView(FlaskView):
     # 회원가입
-    @route('/signup', methods=['POST'])
+    @route('/signup/', methods=['POST'])
     def signup(self):
         try:
             data = UserSchema().load(request.json)
@@ -38,9 +38,7 @@ class UserView(FlaskView):
         except ValidationError as err:
             return err.messages, 400
 
-        user = User.objects.get(username=data['username'])
-        if not user:
-            return {'message': '회원가입을 먼저 해주세요'}, 404
+        user = User.objects.get_or_404(username=data['username'])
         if data['password'] != user.password:
             return {'message': '패스워드가 일치하지않습니다.'}, 400
 
@@ -53,15 +51,16 @@ class UserView(FlaskView):
 
     # 사용자 정보 보기 (마이페이지)
     @jwt_required
+    @route('/me')
     def get(self):
-        user = User.objects.get(id=get_jwt_identity())
-        return UserSchema().dump(user)
+        user = User.objects.get_or_404(id=get_jwt_identity())
+        return UserSchema().dump(user), 200
 
     # 정보 수정
     @jwt_required
-    @route('/me')
+    @route('/me', methods=['PATCH'])
     def patch(self):
-        user = User.objects.get(id=get_jwt_identity())
+        user = User.objects.get_or_404(id=get_jwt_identity())
         try:
             data = UserSchema().load(request.json)
         except ValidationError as err:
@@ -73,16 +72,17 @@ class UserView(FlaskView):
 
     # 사용자 삭제
     @jwt_required
-    @route('/me')
+    @route('/me', methods=['DELETE'])
     def delete(self):
-        User.objects.get(id=get_jwt_identity()).delete()
+        User.objects.get_or_404(id=get_jwt_identity()).delete()
         return {}, 204
 
     # 내가 작성한 글 보기
     @jwt_required
     @route('/me/posts')
-    def board(self):
-        posts = Post.objects(user=get_jwt_identity())
+    def post(self):
+        user = User.objects.get_or_404(id=get_jwt_identity())
+        posts = Post.objects(user=user)
         return jsonify(get_paginated_list(
             model='posts', results=posts, schema=PostSchema(only=("id", "title", "content")),
             url='/users/me/posts', params='',
@@ -93,7 +93,8 @@ class UserView(FlaskView):
     @jwt_required
     @route('/me/comments')
     def comment(self):
-        comments = Comment.objects(user=get_jwt_identity())
+        user = User.objects.get_or_404(id=get_jwt_identity())
+        comments = Comment.objects(user=user)
         return jsonify(get_paginated_list(
             model='comments', results=comments, schema=CommentSchema(only=("id", "content")),
             url='/users/me/comments', params='',
@@ -104,7 +105,8 @@ class UserView(FlaskView):
     @jwt_required
     @route('/me/recomments')
     def recomment(self):
-        recomments = Recomment.objects(user=get_jwt_identity())
+        user = User.objects.get_or_404(id=get_jwt_identity())
+        recomments = Recomment.objects(user=user)
         return jsonify(get_paginated_list(
             model='recomments', results=recomments, schema=RecommentSchema(only=("id", "content")),
             url='/users/me/recomments', params='',
@@ -115,7 +117,8 @@ class UserView(FlaskView):
     @jwt_required
     @route('/me/liked-posts')
     def like(self):
-        boards = Post.objects(likes__in=[get_jwt_identity()])
+        user = User.objects.get_or_404(id=get_jwt_identity())
+        boards = Post.objects(likes__in=[user])
         return jsonify(get_paginated_list(
             model='posts', results=boards, schema=PostSchema(only=("id", "title", "content")),
             url='/users/me/liked-posts', params='',

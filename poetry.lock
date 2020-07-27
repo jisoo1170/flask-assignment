@@ -1,5 +1,5 @@
 [[package]]
-category = "dev"
+category = "main"
 description = "Atomic file writes."
 marker = "sys_platform == \"win32\""
 name = "atomicwrites"
@@ -8,7 +8,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 version = "1.4.0"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Classes Without Boilerplate"
 name = "attrs"
 optional = false
@@ -30,7 +30,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 version = "7.1.2"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Cross-platform colored terminal text."
 marker = "sys_platform == \"win32\""
 name = "colorama"
@@ -211,7 +211,7 @@ sentinels = "*"
 six = "*"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "More routines for operating on iterables, beyond itertools"
 name = "more-itertools"
 optional = false
@@ -219,7 +219,7 @@ python-versions = ">=3.5"
 version = "8.4.0"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Core utilities for Python packages"
 name = "packaging"
 optional = false
@@ -231,7 +231,7 @@ pyparsing = ">=2.0.2"
 six = "*"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "plugin and hook calling mechanisms for python"
 name = "pluggy"
 optional = false
@@ -242,7 +242,7 @@ version = "0.13.1"
 dev = ["pre-commit", "tox"]
 
 [[package]]
-category = "dev"
+category = "main"
 description = "library with cross-python path, ini-parsing, io, code, log facilities"
 name = "py"
 optional = false
@@ -279,7 +279,7 @@ tls = ["ipaddress"]
 zstd = ["zstandard"]
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Python parsing module"
 name = "pyparsing"
 optional = false
@@ -287,7 +287,7 @@ python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 version = "2.4.7"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "pytest: simple powerful testing with Python"
 name = "pytest"
 optional = false
@@ -333,7 +333,7 @@ inflection = "*"
 pytest = ">=3.3.2"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "A set of py.test fixtures to test Flask applications."
 name = "pytest-flask"
 optional = false
@@ -396,7 +396,7 @@ python-versions = "*"
 version = "1.3"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Measures the displayed width of unicode strings in a terminal"
 name = "wcwidth"
 optional = false
@@ -432,7 +432,7 @@ ipaddress = ["ipaddress"]
 locale = ["Babel (>=1.3)"]
 
 [metadata]
-content-hash = "df9f6aed94edb92ff95b01054098728d8de61a7df1a487e386c15058fa7e202c"
+content-hash = "18fe37bbef8bfdc7cc4e3c4a586a43593516a6f35c8aaa657227ffe09a098bbf"
 lock-version = "1.0"
 python-versions = "^3.8"
 

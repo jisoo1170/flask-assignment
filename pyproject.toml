@@ -12,6 +12,8 @@ marshmallow = "^3.7.1"
 flask-classful = "^0.14.2"
 mongoengine = "^0.20.0"
 flask_mongoengine = "^0.9.5"
+pytest = "^5.4.3"
+pytest-flask = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.4.3"

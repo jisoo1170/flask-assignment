@@ -52,14 +52,14 @@ class UserView(FlaskView):
     # 사용자 정보 보기 (마이페이지)
     @jwt_required
     @route('/me')
-    def get(self):
+    def get_me(self):
         user = User.objects.get_or_404(id=get_jwt_identity())
         return UserSchema().dump(user), 200
 
     # 정보 수정
     @jwt_required
     @route('/me', methods=['PATCH'])
-    def patch(self):
+    def patch_me(self):
         user = User.objects.get_or_404(id=get_jwt_identity())
         try:
             data = UserSchema().load(request.json)
@@ -73,14 +73,14 @@ class UserView(FlaskView):
     # 사용자 삭제
     @jwt_required
     @route('/me', methods=['DELETE'])
-    def delete(self):
+    def delete_me(self):
         User.objects.get_or_404(id=get_jwt_identity()).delete()
         return {}, 204
 
     # 내가 작성한 글 보기
     @jwt_required
     @route('/me/posts')
-    def post(self):
+    def my_posts(self):
         user = User.objects.get_or_404(id=get_jwt_identity())
         posts = Post.objects(user=user)
         return jsonify(get_paginated_list(
@@ -92,7 +92,7 @@ class UserView(FlaskView):
     # 내가 작성한 댓글 보기
     @jwt_required
     @route('/me/comments')
-    def comment(self):
+    def my_comments(self):
         user = User.objects.get_or_404(id=get_jwt_identity())
         comments = Comment.objects(user=user)
         return jsonify(get_paginated_list(
@@ -104,7 +104,7 @@ class UserView(FlaskView):
     # 내가 작성한 대댓글 보기
     @jwt_required
     @route('/me/recomments')
-    def recomment(self):
+    def my_recomment(self):
         user = User.objects.get_or_404(id=get_jwt_identity())
         recomments = Recomment.objects(user=user)
         return jsonify(get_paginated_list(
@@ -116,7 +116,7 @@ class UserView(FlaskView):
     # 좋아요 한 게시글 보기
     @jwt_required
     @route('/me/liked-posts')
-    def like(self):
+    def my_liked_posts(self):
         user = User.objects.get_or_404(id=get_jwt_identity())
         boards = Post.objects(likes__in=[user])
         return jsonify(get_paginated_list(

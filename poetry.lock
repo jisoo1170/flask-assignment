@@ -433,7 +433,6 @@ locale = ["Babel (>=1.3)"]
 
 [metadata]
 content-hash = "18fe37bbef8bfdc7cc4e3c4a586a43593516a6f35c8aaa657227ffe09a098bbf"
-lock-version = "1.0"
 python-versions = "^3.8"
 
 [metadata.files]

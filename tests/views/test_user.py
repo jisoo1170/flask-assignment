@@ -1,23 +1,15 @@
 import pytest
 import json
+
+from factory.fuzzy import FuzzyText
 from flask import url_for
 from flask_jwt_extended import create_access_token
 
 from tests.factories.user import UserFactory
-from app.serailziers.user import UserFormSchema
+from app.serailziers.user import UserCreateFormSchema
 
 
 class Describe_Userview:
-    @pytest.fixture
-    def user(self):
-        user = UserFactory.create()
-        return user
-
-    @pytest.fixture
-    def auth_token(self, user):
-        return create_access_token(identity=str(user.id))
-
-
     class Describe_signup:
         @pytest.fixture
         def form(self):
@@ -27,7 +19,7 @@ class Describe_Userview:
         @pytest.fixture
         def subject(self, client, form):
             url = url_for('UserView:signup')
-            response = client.post(url, json=UserFormSchema().dump(form))
+            response = client.post(url, json=UserCreateFormSchema().dump(form))
             return response
 
         class Context_정상_요청:
@@ -66,7 +58,7 @@ class Describe_Userview:
         @pytest.fixture
         def subject(self, client, user):
             url = url_for('UserView:login')
-            response = client.post(url, json=UserFormSchema().dump(user))
+            response = client.post(url, json=UserCreateFormSchema().dump(user))
             return response
 
         class Context_정상_요청:
@@ -92,24 +84,21 @@ class Describe_Userview:
             def test_400을_반환한다(self, subject):
                 assert subject.status_code == 400
 
-    class Describe_get:
+    class Describe_get_me:
         @pytest.fixture
-        def subject(self, client, auth_token):
-            url = url_for('UserView:get')
-            data = {'Authorization': f'Bearer {auth_token}'}
-            response = client.get(url, headers=data)
+        def subject(self, client, headers):
+            url = url_for('UserView:get_me')
+            response = client.get(url, headers=headers)
             return response
 
         class Context_정상_요청:
-            def test_유저_정보를_반환한다(self, subject):
+            def test_유저_정보를_반환한다(self, subject, logged_in_user):
                 assert subject.status_code == 200
 
         class Context_토큰이_없는_경우:
             @pytest.fixture
-            def subject(self, client):
-                url = url_for('UserView:get')
-                response = client.get(url)
-                return response
+            def auth_token(self):
+                return None
 
             def test_401을_반환한다(self, subject):
                 assert subject.status_code == 401
@@ -120,19 +109,19 @@ class Describe_Userview:
                 return create_access_token(identity=0)
 
             def test_404를_반환한다(self, subject):
-                assert subject.status_code == 404
+                assert subject.status_code == 401
 
+    # 비밀번호 수정
     class Describe_patch:
         @pytest.fixture
-        def user(self, user):
-            user.username = 'change username'
-            return user
+        def logged_in_user(self, logged_in_user):
+            logged_in_user.username = 'change username'
+            return logged_in_user
 
         @pytest.fixture()
-        def subject(self, client, auth_token, user):
+        def subject(self, client, headers, logged_in_user):
             url = url_for('UserView:patch')
-            data = {'Authorization': f'Bearer {auth_token}'}
-            response = client.patch(url, headers=data, json=UserFormSchema().dump(user))
+            response = client.patch(url, headers=headers, json=UserCreateFormSchema().dump(logged_in_user))
             return response
 
         class Context_정상_요청:
@@ -146,6 +135,7 @@ class Describe_Userview:
                 exist_user = UserFactory.create()
                 user.username = exist_user.username
                 return user
+
             def test_409를_반환한다(self, subject):
                 return subject.status_code == 409
 
@@ -169,10 +159,9 @@ class Describe_Userview:
 
     class Describe_get_posts:
         @pytest.fixture()
-        def subject(self, client, auth_token):
+        def subject(self, client, headers):
             url = url_for('UserView:post')
-            authorization = {'Authorization': f'Bearer {auth_token}'}
-            response = client.get(url, headers=authorization)
+            response = client.get(url, headers=headers)
             return response
 
         class Context_정상_요청:
@@ -201,10 +190,9 @@ class Describe_Userview:
 
     class Describe_get_comments:
         @pytest.fixture()
-        def subject(self, client, auth_token):
+        def subject(self, client, headers):
             url = url_for('UserView:comment')
-            authorization = {'Authorization': f'Bearer {auth_token}'}
-            response = client.get(url, headers=authorization)
+            response = client.get(url, headers=headers)
             return response
 
         class Context_정상_요청:
@@ -232,10 +220,9 @@ class Describe_Userview:
 
     class Describe_get_recomments:
         @pytest.fixture()
-        def subject(self, client, auth_token):
+        def subject(self, client, headers):
             url = url_for('UserView:recomment')
-            authorization = {'Authorization': f'Bearer {auth_token}'}
-            response = client.get(url, headers=authorization)
+            response = client.get(url, headers=headers)
             return response
 
         class Context_정상_요청:
@@ -263,10 +250,9 @@ class Describe_Userview:
 
     class Describe_get_liked_posts:
         @pytest.fixture()
-        def subject(self, client, auth_token):
+        def subject(self, client, headers):
             url = url_for('UserView:like')
-            authorization = {'Authorization': f'Bearer {auth_token}'}
-            response = client.get(url, headers=authorization)
+            response = client.get(url, headers=headers)
             return response
 
         class Context_정상_요청:

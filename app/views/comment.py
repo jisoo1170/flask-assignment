@@ -1,11 +1,10 @@
 from flask_classful import FlaskView, route
 from flask import request, jsonify, g
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required
 from marshmallow import ValidationError
 
 from app.models.post import Post
 from app.models.comment import Comment, Recomment
-from app.models.user import User
 from app.serailziers.comment import CommentSchema, RecommentSchema
 from app.views import get_paginated_list
 from app.views.auth import login_required

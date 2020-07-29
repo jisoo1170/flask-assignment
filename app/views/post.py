@@ -1,10 +1,9 @@
 from flask_classful import FlaskView, route
 from flask import request, jsonify, g
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required
 from marshmallow import ValidationError
 
 from app.models.post import Post
-from app.models.user import User
 from app.serailziers.post import PostSchema
 from app.views import get_paginated_list
 from app.views.auth import login_required
@@ -29,7 +28,7 @@ class PostView(FlaskView):
 
     def get(self, post_id):
         post = Post.objects.get_or_404(id=post_id)
-        post.modify(inc__num_of_views=1)
+        post.read()
         return PostSchema().dump(post), 200
 
     @jwt_required
@@ -37,8 +36,6 @@ class PostView(FlaskView):
     def post(self):
         try:
             data = PostSchema().load(request.json)
-            if 'tags' in data:
-                data['tags'] = [x.lower() for x in data['tags']]
         except ValidationError as err:
             return err.messages, 400
 
@@ -80,8 +77,17 @@ class PostView(FlaskView):
         post = Post.objects.get_or_404(id=id)
         # 이미 좋아요를 누른 경우 좋아요 취소
         if g.user in post.likes:
-            post.modify(pull__likes=g.user)
-        else:
-            post.modify(add_to_set__likes=[g.user])
-        post.modify(num_of_likes=len(post.likes))
+            return {'message': '이미 좋아요를 눌렀습니다'}, 400
+        post.like(g.user)
+        return PostSchema().dump(post), 200
+
+
+    @jwt_required
+    @login_required
+    @route('/<id>/unlikes', methods=['DELETE'])
+    def unlike(self, id):
+        post = Post.objects.get_or_404(id=id)
+        if g.user not in post.likes:
+            return {'message': '좋아요를 눌러주세요'}, 400
+        post.unlike(g.user)
         return PostSchema().dump(post), 200

@@ -5,20 +5,19 @@ from marshmallow import ValidationError
 
 from app.models.post import Post
 from app.models.comment import Comment, Recomment
-from app.serailziers.comment import CommentSchema, RecommentSchema
+from app.serailziers.comment import CommentSchema, RecommentSchema, CommentPaginationSchema
 from app.views import get_paginated_list
 from app.views.auth import login_required
 
 
 class CommentView(FlaskView):
-    def index(self, post_id):
+    def index(self, post_id, per_page=10):
         Post.objects.get_or_404(id=post_id)
         comments = Comment.objects(post=post_id).order_by('-num_of_likes')
-        return jsonify(get_paginated_list(
-            model='comments', results=comments, schema=CommentSchema(),
-            url=f'/posts/{post_id}/comments', params='',
-            start=int(request.args.get('start', 1)), limit=20
-        )), 200
+
+        page = int(request.args.get('page', 1))
+        paginated_comments = comments.paginate(page=page, per_page=per_page)
+        return CommentPaginationSchema().dump(paginated_comments)
 
     @jwt_required
     @login_required

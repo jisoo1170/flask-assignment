@@ -7,8 +7,8 @@ from app.models.user import User
 from app.models.post import Post
 from app.models.comment import Comment, Recomment
 from app.serailziers.user import UserSchema, UserPasswordChangeSchema
-from app.serailziers.post import PostSchema
-from app.serailziers.comment import CommentSchema, RecommentSchema
+from app.serailziers.post import PostSchema, PostPaginationSchema
+from app.serailziers.comment import CommentSchema, RecommentSchema, CommentPaginationSchema, RecommentPaginationSchema
 
 from app.views import get_paginated_list
 from app.views.auth import login_required
@@ -81,46 +81,38 @@ class UserView(FlaskView):
     @jwt_required
     @login_required
     @route('/me/posts')
-    def my_posts(self):
+    def my_posts(self, per_page=10):
         posts = Post.objects(user=g.user)
-        return jsonify(get_paginated_list(
-            model='posts', results=posts, schema=PostSchema(only=("id", "title", "content")),
-            url='/users/me/posts', params='',
-            start=int(request.args.get('start', 1)), limit=15
-        )), 200
+        page = int(request.args.get('page', 1))
+        paginated_posts = posts.paginate(page=page, per_page=per_page)
+        return PostPaginationSchema().dump(paginated_posts)
 
     # 내가 작성한 댓글 보기
     @jwt_required
     @login_required
     @route('/me/comments')
-    def my_comments(self):
+    def my_comments(self, per_page=10):
         comments = Comment.objects(user=g.user)
-        return jsonify(get_paginated_list(
-            model='comments', results=comments, schema=CommentSchema(only=("id", "content")),
-            url='/users/me/comments', params='',
-            start=int(request.args.get('start', 1)), limit=15
-        )), 200
+        page = int(request.args.get('page', 1))
+        paginated_comments = comments.paginate(page=page, per_page=per_page)
+        return CommentPaginationSchema().dump(paginated_comments)
 
     # 내가 작성한 대댓글 보기
     @jwt_required
     @login_required
     @route('/me/recomments')
-    def my_recomments(self):
+    def my_recomments(self, per_page=10):
         recomments = Recomment.objects(user=g.user)
-        return jsonify(get_paginated_list(
-            model='recomments', results=recomments, schema=RecommentSchema(only=("id", "content")),
-            url='/users/me/recomments', params='',
-            start=int(request.args.get('start', 1)), limit=15
-        )), 200
+        page = int(request.args.get('page', 1))
+        paginated_recomments = recomments.paginate(page=page, per_page=per_page)
+        return RecommentPaginationSchema().dump(paginated_recomments)
 
     # 좋아요 한 게시글 보기
     @jwt_required
     @login_required
     @route('/me/liked-posts')
-    def my_liked_posts(self):
-        boards = Post.objects(likes__in=[g.user])
-        return jsonify(get_paginated_list(
-            model='posts', results=boards, schema=PostSchema(only=("id", "title", "content")),
-            url='/users/me/liked-posts', params='',
-            start=int(request.args.get('start', 1)), limit=15
-        )), 200
+    def my_liked_posts(self, per_page=10):
+        posts = Post.objects(likes__in=[g.user])
+        page = int(request.args.get('page', 1))
+        paginated_posts = posts.paginate(page=page, per_page=per_page)
+        return PostPaginationSchema().dump(paginated_posts)

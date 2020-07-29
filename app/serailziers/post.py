@@ -20,3 +20,18 @@ class PostSchema(Schema):
     # def wrap(self, data, many, **kwargs):
     #     key = "boards" if many else "board"
     #     return {key: data}
+
+
+class PostCreateSchema(Schema):
+    title = fields.String(required=True)
+    content = fields.String(required=True)
+    tags = fields.List(fields.String())
+
+
+class PostPaginationSchema(Schema):
+    items = fields.Nested(PostSchema, many=True)
+    page = fields.Integer(missing=1)
+    per_page = fields.Integer(missing=10)
+    total = fields.Integer()
+
+

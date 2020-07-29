@@ -4,27 +4,27 @@ from flask_jwt_extended import jwt_required
 from marshmallow import ValidationError
 
 from app.models.post import Post
-from app.serailziers.post import PostSchema
+from app.serailziers.post import PostSchema, PostPaginationSchema
 from app.views import get_paginated_list
 from app.views.auth import login_required
 
 
 class PostView(FlaskView):
-    def index(self):
+    def index(self, per_page=10):
         posts = Post.objects()
         order = request.args.get('order')
         tag = request.args.get('tag')
         params = []
         if tag:
+            posts = posts(tags__iexact=tag)
             params.append(f'&tag={tag}')
         if order:
             posts = posts.order_by(f'-{order}')
             params.append(f'&order={order}')
-        return jsonify(get_paginated_list(
-            model='posts', results=posts, schema=PostSchema(exclude=['likes']),
-            url='/posts', params=''.join(params),
-            start=int(request.args.get('start', 1)), limit=3
-        )), 200
+
+        page = int(request.args.get('page', 1))
+        paginated_posts = posts.paginate(page=page, per_page=per_page)
+        return PostPaginationSchema().dump(paginated_posts)
 
     def get(self, post_id):
         post = Post.objects.get_or_404(id=post_id)
@@ -50,7 +50,6 @@ class PostView(FlaskView):
         # 권한 확인
         if post.user != g.user:
             return {'message': '권한이 없습니다'}, 403
-
         try:
             data = PostSchema().load(request.json)
         except ValidationError as err:

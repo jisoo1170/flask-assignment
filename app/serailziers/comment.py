@@ -28,3 +28,17 @@ class CommentSchema(Schema):
     # def wrap(self, data, many, **kwargs):
     #     key = "comments" if many else "comment"
     #     return {key: data}
+
+
+class CommentPaginationSchema(Schema):
+    items = fields.Nested(CommentSchema, many=True)
+    page = fields.Integer(missing=1)
+    per_page = fields.Integer(missing=10)
+    total = fields.Integer()
+
+
+class RecommentPaginationSchema(Schema):
+    items = fields.Nested(RecommentSchema, many=True)
+    page = fields.Integer(missing=1)
+    per_page = fields.Integer(missing=10)
+    total = fields.Integer()

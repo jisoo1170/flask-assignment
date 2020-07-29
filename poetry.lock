@@ -136,6 +136,14 @@ WTForms = "*"
 itsdangerous = "*"
 
 [[package]]
+category = "main"
+description = "A fancy and practical functional tools"
+name = "funcy"
+optional = false
+python-versions = "*"
+version = "1.14"
+
+[[package]]
 category = "dev"
 description = "A port of Ruby on Rails inflector to Python"
 name = "inflection"
@@ -432,7 +440,8 @@ ipaddress = ["ipaddress"]
 locale = ["Babel (>=1.3)"]
 
 [metadata]
-content-hash = "18fe37bbef8bfdc7cc4e3c4a586a43593516a6f35c8aaa657227ffe09a098bbf"
+content-hash = "11e47ad9cec4364d78fd9c2f62797f02fda8dffbb429862073d2107c0f17b99d"
+lock-version = "1.0"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -478,6 +487,9 @@ flask-mongoengine = [
 flask-wtf = [
     {file = "Flask-WTF-0.14.3.tar.gz", hash = "sha256:d417e3a0008b5ba583da1763e4db0f55a1269d9dd91dcc3eb3c026d3c5dbd720"},
     {file = "Flask_WTF-0.14.3-py2.py3-none-any.whl", hash = "sha256:57b3faf6fe5d6168bda0c36b0df1d05770f8e205e18332d0376ddb954d17aef2"},
+]
+funcy = [
+    {file = "funcy-1.14.tar.gz", hash = "sha256:75ee84c3b446f92e68a857c2267b15a1b49c631c9d5a87a5f063cd2d6761a5c4"},
 ]
 inflection = [
     {file = "inflection-0.5.0-py2.py3-none-any.whl", hash = "sha256:88b101b2668a1d81d6d72d4c2018e53bc6c7fc544c987849da1c7f77545c3bc9"},

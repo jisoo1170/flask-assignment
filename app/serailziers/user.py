@@ -10,7 +10,7 @@ class UserSchema(Schema):
     password = fields.String(load_only=True, required=True)
 
 
-class UserCreateFormSchema(Schema):
+class UserCreateSchema(Schema):
     username = fields.String(required=True)
     password = fields.String(required=True)
 
@@ -19,5 +19,6 @@ class UserPasswordChangeSchema(Schema):
     password = fields.String(required=True)
 
 
-class UserPatchSchema(Schema):
-    avatar = fields.String()
+class UserLoginSchema(Schema):
+    username = fields.String(required=True)
+    password = fields.String(required=True)

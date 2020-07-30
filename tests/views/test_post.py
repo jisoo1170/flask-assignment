@@ -252,5 +252,5 @@ class Describe_PostView:
                 created_post.save()
                 return created_post
 
-            def test_400이_반환된다(self, subject):
-                assert subject.status_code == 400
+            def test_409가_반환된다(self, subject):
+                assert subject.status_code == 409

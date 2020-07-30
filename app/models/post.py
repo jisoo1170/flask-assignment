@@ -2,6 +2,7 @@ from mongoengine import fields, CASCADE
 from flask_mongoengine import Document
 
 from .user import User
+from ..errors import IllegalStateError
 
 
 class Post(Document):
@@ -14,15 +15,14 @@ class Post(Document):
     num_of_views = fields.IntField(min_value=0, default=0)
 
     def read(self):
-        self.num_of_views += 1
-        self.save()
+        self.modify(inc__num_of_views=1)
 
     def like(self, user):
-        self.likes.append(user)
-        self.num_of_likes += 1
-        self.save()
+        if user in self.likes:
+            raise IllegalStateError("이미 좋아요를 눌렀습니다.")
+        self.modify(add_to_set__likes=[user], inc__num_of_likes=1)
 
     def unlike(self, user):
-        self.likes.remove(user)
-        self.num_of_likes -= 1
-        self.save()
+        if user in self.likes:
+            raise IllegalStateError("좋아요를 눌러주세요.")
+        self.modify(pull__likes=user, inc__num_of_likes=-1)

@@ -1,7 +1,9 @@
+from random import randrange
+
 import pytest
 from bson import ObjectId
 from factory.fuzzy import FuzzyText
-from flask import url_for, g
+from flask import url_for
 from flask_jwt_extended import create_access_token
 from funcy import pairwise
 
@@ -25,7 +27,11 @@ class Describe_PostView:
         class Context_좋아요_정렬하는_경우:
             @pytest.fixture(autouse=True)
             def posts(self):
-                PostFactory.create_batch(5)
+                PostFactory.create(num_of_likes=randrange(50))
+                PostFactory.create(num_of_likes=randrange(50))
+                PostFactory.create(num_of_likes=randrange(50))
+                PostFactory.create(num_of_likes=randrange(50))
+                PostFactory.create(num_of_likes=randrange(50))
 
             @pytest.fixture
             def subject(self, client):
@@ -44,7 +50,11 @@ class Describe_PostView:
         class Context_조회수_정렬하는_경우:
             @pytest.fixture(autouse=True)
             def posts(self):
-                PostFactory.create_batch(5)
+                PostFactory.create(num_of_views=randrange(50))
+                PostFactory.create(num_of_views=randrange(50))
+                PostFactory.create(num_of_views=randrange(50))
+                PostFactory.create(num_of_views=randrange(50))
+                PostFactory.create(num_of_views=randrange(50))
 
             @pytest.fixture
             def subject(self, client):

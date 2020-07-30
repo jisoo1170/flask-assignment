@@ -7,10 +7,9 @@ from app.models.user import User
 from app.models.post import Post
 from app.models.comment import Comment, Recomment
 from app.serailziers.user import UserSchema, UserPasswordChangeSchema
-from app.serailziers.post import PostSchema, PostPaginationSchema
-from app.serailziers.comment import CommentSchema, RecommentSchema, CommentPaginationSchema, RecommentPaginationSchema
+from app.serailziers.post import PostPaginationSchema
+from app.serailziers.comment import CommentPaginationSchema, RecommentPaginationSchema
 
-from app.views import get_paginated_list
 from app.views.auth import login_required
 
 

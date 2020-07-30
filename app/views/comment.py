@@ -6,7 +6,6 @@ from marshmallow import ValidationError
 from app.models.post import Post
 from app.models.comment import Comment, Recomment
 from app.serailziers.comment import CommentSchema, RecommentSchema, CommentPaginationSchema
-from app.views import get_paginated_list
 from app.views.auth import login_required
 
 

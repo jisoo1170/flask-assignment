@@ -6,8 +6,8 @@ from .user import User
 
 class Post(Document):
     user = fields.ReferenceField(User, reverse_delete_rule=CASCADE, dbref=False)
-    title = fields.StringField(max_length=100, required=True)
-    content = fields.StringField(required=True)
+    title = fields.StringField(max_length=100, required=True, null=False)
+    content = fields.StringField(required=True, null=False)
     tags = fields.ListField(fields.StringField(max_length=20))
     likes = fields.ListField(fields.ReferenceField(User, reverse_delete_rule=CASCADE, dbref=False))
     num_of_likes = fields.IntField(min_value=0, default=0)

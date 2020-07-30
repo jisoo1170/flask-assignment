@@ -137,7 +137,7 @@ class Describe_Userview:
         class Context_정상_요청:
             def test_작성한_게시글을_반환한다(self, subject):
                 assert subject.status_code == 200
-                assert 'posts' in subject.json
+                assert 'items' in subject.json
 
     class Describe_get_comments:
         @pytest.fixture()
@@ -149,7 +149,7 @@ class Describe_Userview:
         class Context_정상_요청:
             def test_작성한_댓글을_반환한다(self, subject):
                 assert subject.status_code == 200
-                assert 'comments' in subject.json
+                assert 'items' in subject.json
 
     class Describe_get_recomments:
         @pytest.fixture()
@@ -161,7 +161,7 @@ class Describe_Userview:
         class Context_정상_요청:
             def test_작성한_게시글을_반환한다(self, subject):
                 assert subject.status_code == 200
-                assert 'recomments' in subject.json
+                assert 'items' in subject.json
 
     class Describe_get_liked_posts:
         @pytest.fixture()
@@ -173,4 +173,4 @@ class Describe_Userview:
         class Context_정상_요청:
             def test_작성한_게시글을_반환한다(self, subject):
                 assert subject.status_code == 200
-                assert 'posts' in subject.json
+                assert 'items' in subject.json

@@ -4,11 +4,9 @@ import pytest
 from bson import ObjectId
 from factory.fuzzy import FuzzyText
 from flask import url_for
-from flask_jwt_extended import create_access_token
 from funcy import pairwise
 
 from tests.factories.post import PostFactory
-from tests.factories.user import UserFactory
 
 
 class Describe_PostView:
@@ -73,26 +71,39 @@ class Describe_PostView:
         class Context_태그_검색을_하는_경우:
             @pytest.fixture(autouse=True)
             def posts(self):
-                PostFactory.create(tags=['1', '2'])
-                PostFactory.create(tags=['1', '3'])
-                PostFactory.create(tags=['1'])
-                PostFactory.create(tags=['2'])
-                PostFactory.create(tags=['3'])
+                PostFactory.create(tags=['tag1', 'tag2'])
+                PostFactory.create(tags=['TAg1', 'tag3'])
+                PostFactory.create(tags=['tag1'])
+                PostFactory.create(tags=['TAG2'])
+                PostFactory.create(tags=['tAg3'])
 
             @pytest.fixture
-            def subject(self, client):
+            def params(self):
+                return 'TAG1'
+
+            @pytest.fixture
+            def num_of_expected_return_values(self, posts, params):
+                count = 0
+                for post in posts:
+                    if params.lower() in post.likes:
+                        count += 1
+                return count
+
+            @pytest.fixture
+            def subject(self, client, params):
                 url = url_for('PostView:index')
-                params = {'tag': '1'}
-                response = client.get(url, query_string=params)
-                print(response)
+                response = client.get(url, query_string={'tag': params})
                 return response
 
-            def test_200이_반환된다(self, subject):
+            def test_200이_반환된다(self, subject, params, num_of_expected_return_values):
                 assert subject.status_code == 200
                 assert 'items' in subject.json
                 posts = subject.json['items']
+
                 for post in posts:
-                    assert '1' in post['tags']
+                    tags = [p.lower() for p in post['tags']]
+                    assert params.lower() in tags
+                assert len(posts) == num_of_expected_return_values
 
     class Describe_post:
         @pytest.fixture()
@@ -116,7 +127,7 @@ class Describe_PostView:
                 return {'content': 'test content'}
 
             def test_400이_반환된다(self, subject):
-                assert subject.status_code == 400
+                assert subject.status_code == 422
 
         class Context_내용이_없는_경우:
             @pytest.fixture()
@@ -124,7 +135,7 @@ class Describe_PostView:
                 return {'title': 'test title'}
 
             def test_400이_반환된다(self, subject):
-                assert subject.status_code == 400
+                assert subject.status_code == 422
 
     class Describe_get:
         @pytest.fixture
@@ -202,8 +213,8 @@ class Describe_PostView:
             def form(self):
                 return {'title': '', 'content': ''}
 
-            def test_400를_반환한다(self, subject):
-                assert subject.status_code == 400
+            def test_422를_반환한다(self, subject):
+                assert subject.status_code == 422
 
     class Describe_delete:
         @pytest.fixture
@@ -222,45 +233,60 @@ class Describe_PostView:
 
         class Context_작성한_사용자가_아닌_경우:
             @pytest.fixture
-            def auth_token(self):
-                logged_in_another_user = UserFactory.create()
-                return create_access_token(identity=str(logged_in_another_user.id))
+            def created_post(self, logged_in_user):
+                return PostFactory.create()
 
-            @pytest.fixture
-            def subject(self, client, headers, created_post):
-                url = url_for('PostView:delete', id=created_post.id)
-                response = client.delete(url, headers=headers)
-                return response
-
-            def test_403을_반환한다(self, subject):
+            def test_403이_반환된다(self, subject):
                 assert subject.status_code == 403
 
     class Describe_like:
         @pytest.fixture
         def created_post(self, logged_in_user):
-            return PostFactory.create(user=logged_in_user)
+            return PostFactory.create()
 
         @pytest.fixture
-        def subject(self, client, headers, created_post, logged_in_user):
-            url = url_for('PostView:like', id=created_post.id)
+        def subject(self, client, headers, created_post):
+            url = url_for('PostView:likes', id=created_post.id)
             response = client.post(url, headers=headers)
             return response
 
         class Context_정상_요청:
             def test_200이_반환된다(self, subject, created_post):
                 assert subject.status_code == 200
-                assert subject.json['num_of_likes'] == created_post.num_of_likes + 1
+                assert subject.json['num_of_likes'] == created_post.num_of_likes+1
 
         class Context_이미_누른_경우:
             @pytest.fixture
-            def logged_in_user(self):
-                return UserFactory.create()
-
-            @pytest.fixture
             def created_post(self, created_post, logged_in_user):
-                created_post.likes.append(logged_in_user)
-                created_post.save()
+                created_post.like(logged_in_user)
                 return created_post
 
             def test_409가_반환된다(self, subject):
+                assert subject.status_code == 409
+
+    class Describe_unlike:
+        @pytest.fixture
+        def created_post(self, logged_in_user):
+            post = PostFactory.create()
+            post.like(logged_in_user)
+            return post
+
+        @pytest.fixture
+        def subject(self, client, headers, created_post):
+            url = url_for('PostView:unlikes', id=created_post.id)
+            response = client.delete(url, headers=headers)
+            return response
+
+        class Context_정상_요청:
+            def test_200이_반환된다(self, subject, created_post):
+                assert subject.status_code == 200
+                assert subject.json['num_of_likes'] == created_post.num_of_likes-1
+
+        class Context_이전에_누르지_않은_경우:
+            @pytest.fixture
+            def created_post(self):
+                post = PostFactory.create()
+                return post
+
+            def test_409가_반환된다(self, subject, created_post):
                 assert subject.status_code == 409

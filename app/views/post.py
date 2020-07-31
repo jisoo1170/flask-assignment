@@ -1,5 +1,5 @@
 from flask_classful import FlaskView, route
-from flask import request, jsonify, g
+from flask import request, g
 from flask_jwt_extended import jwt_required
 from marshmallow import ValidationError
 
@@ -33,7 +33,7 @@ class PostView(FlaskView):
         try:
             data = PostSchema().load(request.json)
         except ValidationError as err:
-            return err.messages, 400
+            return err.messages, 422
         post = Post(user=g.user, **data)
         post.save()
         return PostSchema().dump(post), 201
@@ -48,7 +48,7 @@ class PostView(FlaskView):
         try:
             data = PostUpdateSchema().load(request.json)
         except ValidationError as err:
-            return err.messages, 400
+            return {'message': err.messages}, 422
         post.modify(**data)
         return PostSchema().dump(post), 200
 
@@ -65,22 +65,22 @@ class PostView(FlaskView):
     @jwt_required
     @login_required
     @route('/<id>/likes', methods=['POST'])
-    def like(self, id):
+    def likes(self, id):
         post = Post.objects.get_or_404(id=id)
         try:
             post.like(g.user)
         except IllegalStateError as err:
-            return err.message, 409
+            return {'message': err.message}, 409
         return PostSchema().dump(post), 200
 
 
     @jwt_required
     @login_required
     @route('/<id>/unlikes', methods=['DELETE'])
-    def unlike(self, id):
+    def unlikes(self, id):
         post = Post.objects.get_or_404(id=id)
         try:
             post.unlike(g.user)
         except IllegalStateError as err:
-            return err.message, 409
+            return {'message': err.message}, 409
         return PostSchema().dump(post), 200

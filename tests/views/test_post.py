@@ -71,23 +71,21 @@ class Describe_PostView:
         class Context_태그_검색을_하는_경우:
             @pytest.fixture(autouse=True)
             def posts(self):
-                PostFactory.create(tags=['tag1', 'tag2'])
-                PostFactory.create(tags=['TAg1', 'tag3'])
-                PostFactory.create(tags=['tag1'])
-                PostFactory.create(tags=['TAG2'])
-                PostFactory.create(tags=['tAg3'])
+                return [
+                    PostFactory.create(tags=['tag1', 'tag2']),
+                    PostFactory.create(tags=['tAg1', 'tag3']),
+                    PostFactory.create(tags=['TAG1']),
+                    PostFactory.create(tags=['TAG2']),
+                    PostFactory.create(tags=['tAg3'])
+                ]
 
             @pytest.fixture
             def params(self):
                 return 'TAG1'
 
             @pytest.fixture
-            def num_of_expected_return_values(self, posts, params):
-                count = 0
-                for post in posts:
-                    if params.lower() in post.likes:
-                        count += 1
-                return count
+            def expected_posts(self, posts):
+                return [posts[0], posts[1], posts[2]]
 
             @pytest.fixture
             def subject(self, client, params):
@@ -95,15 +93,12 @@ class Describe_PostView:
                 response = client.get(url, query_string={'tag': params})
                 return response
 
-            def test_200이_반환된다(self, subject, params, num_of_expected_return_values):
+            def test_200이_반환된다(self, subject, params, expected_posts):
                 assert subject.status_code == 200
                 assert 'items' in subject.json
                 posts = subject.json['items']
-
-                for post in posts:
-                    tags = [p.lower() for p in post['tags']]
-                    assert params.lower() in tags
-                assert len(posts) == num_of_expected_return_values
+                for post, expected_post in zip(posts, expected_posts):
+                    assert post['id'] == str(expected_post['id'])
 
     class Describe_post:
         @pytest.fixture()

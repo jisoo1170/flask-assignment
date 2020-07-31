@@ -8,7 +8,7 @@ class Config(object):
     MONGODB_DB = 'tutorial'
 
 
-class DevelopmentConfig(Config):
+class LocalConfig(Config):
     DEBUG = True
 
 
@@ -17,4 +17,4 @@ class TestConfig(Config):
     TESTING = True
 
 
-config_by_name = dict(dev=DevelopmentConfig, test=TestConfig)
+config_by_name = dict(local=LocalConfig, test=TestConfig)

@@ -1,85 +1,86 @@
 from flask_classful import FlaskView, route
-from flask import request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask import request, g
+from flask_jwt_extended import jwt_required
 from marshmallow import ValidationError
 
+from app.errors import IllegalStateError
 from app.models.post import Post
-from app.models.user import User
-from app.serailziers.post import PostSchema
-from app.views import get_paginated_list
+from app.serailziers.post import PostSchema, PostPaginationSchema, PostUpdateSchema
+from app.views.auth import login_required
 
 
 class PostView(FlaskView):
-    def index(self):
+    def index(self, per_page=10):
         posts = Post.objects()
         order = request.args.get('order')
         tag = request.args.get('tag')
-        params = []
         if tag:
-            params.append(f'&tag={tag}')
+            posts = posts(tags__iexact=tag)
         if order:
             posts = posts.order_by(f'-{order}')
-            params.append(f'&order={order}')
-        return jsonify(get_paginated_list(
-            model='posts', results=posts, schema=PostSchema(exclude=['likes']),
-            url='/posts', params=''.join(params),
-            start=int(request.args.get('start', 1)), limit=3
-        )), 200
+        page = int(request.args.get('page', 1))
+        paginated_posts = posts.paginate(page=page, per_page=per_page)
+        return PostPaginationSchema().dump(paginated_posts)
 
     def get(self, post_id):
         post = Post.objects.get_or_404(id=post_id)
-        post.modify(inc__num_of_views=1)
+        post.read()
         return PostSchema().dump(post), 200
 
     @jwt_required
+    @login_required
     def post(self):
         try:
             data = PostSchema().load(request.json)
-            if 'tags' in data:
-                data['tags'] = [x.lower() for x in data['tags']]
         except ValidationError as err:
-            return err.messages, 400
-
-        post = Post(user=get_jwt_identity(), **data)
+            return err.messages, 422
+        post = Post(user=g.user, **data)
         post.save()
         return PostSchema().dump(post), 201
 
     @jwt_required
-    def patch(self, id):
-        post = Post.objects.get_or_404(id=id)
-        user = User.objects.get(id=get_jwt_identity())
+    @login_required
+    def patch(self, post_id):
+        post = Post.objects.get_or_404(id=post_id)
         # 권한 확인
-        if post.user != user:
+        if post.user != g.user:
             return {'message': '권한이 없습니다'}, 403
-
         try:
-            data = PostSchema().load(request.json)
+            data = PostUpdateSchema().load(request.json)
         except ValidationError as err:
-            err.messages, 400
-
+            return {'message': err.messages}, 422
         post.modify(**data)
         return PostSchema().dump(post), 200
 
     @jwt_required
+    @login_required
     def delete(self, id):
         post = Post.objects.get_or_404(id=id)
-        user = User.objects.get(id=get_jwt_identity())
         # 권한 확인
-        if post.user != user:
+        if post.user != g.user:
             return {'message': '권한이 없습니다'}, 403
-
         post.delete()
         return {}, 204
 
     @jwt_required
+    @login_required
     @route('/<id>/likes', methods=['POST'])
-    def like(self, id):
+    def likes(self, id):
         post = Post.objects.get_or_404(id=id)
-        user = User.objects.get(id=get_jwt_identity())
-        # 이미 좋아요를 누른 경우 좋아요 취소
-        if user in post.likes:
-            post.modify(pull__likes=user)
-        else:
-            post.modify(add_to_set__likes=[user])
-        post.modify(num_of_likes=len(post.likes))
+        try:
+            post.like(g.user)
+        except IllegalStateError as err:
+            return {'message': err.message}, 409
+        return PostSchema().dump(post), 200
+
+
+    @jwt_required
+    @login_required
+    @route('/<id>/unlikes', methods=['DELETE'])
+    def unlikes(self, id):
+        post = Post.objects.get_or_404(id=id)
+        try:
+            post.unlike(g.user)
+        except IllegalStateError as err:
+            return {'message': err.message}, 409
         return PostSchema().dump(post), 200

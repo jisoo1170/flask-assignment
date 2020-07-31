@@ -11,7 +11,7 @@ from app.views import post, comment, user
 def create_app():
     app = Flask(__name__)
     # app.config.from_object('app.config.DevelopmentConfig')
-    config_name = os.getenv('APP_ENV') or 'dev'
+    config_name = os.getenv('APP_ENV') or 'local'
     app.config.from_object(config_by_name[config_name])
 
     # 디비 연결
@@ -27,9 +27,9 @@ def create_app():
 
     # jwt
     jwt = JWTManager(app)
-    print(app.url_map)
+    # print(app.url_map)
     # error
-    from app.error import page_not_found
+    from app.errors import page_not_found
     app.register_error_handler(404, page_not_found)
 
     return app

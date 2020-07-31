@@ -80,7 +80,7 @@ class Describe_PostView:
                 ]
 
             @pytest.fixture
-            def params(self):
+            def tag_keyword(self):
                 return 'TAG1'
 
             @pytest.fixture
@@ -88,12 +88,12 @@ class Describe_PostView:
                 return [posts[0], posts[1], posts[2]]
 
             @pytest.fixture
-            def subject(self, client, params):
+            def subject(self, client, tag_keyword):
                 url = url_for('PostView:index')
-                response = client.get(url, query_string={'tag': params})
+                response = client.get(url, query_string={'tag': tag_keyword})
                 return response
 
-            def test_200이_반환된다(self, subject, params, expected_posts):
+            def test_200이_반환된다(self, subject, expected_posts):
                 assert subject.status_code == 200
                 assert 'items' in subject.json
                 posts = subject.json['items']

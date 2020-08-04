@@ -19,7 +19,6 @@
 - 태그 검색
 - 글, 댓글, 대댓글 좋아요
 
-## Step2
 **깔끔한 명세 만들기**
 - Rest API
 - Board → Post
@@ -38,3 +37,17 @@
 
 **패키지 매니져 변경**
 - poetry
+
+
+## 실행
+
+의존성 설치
+```
+poetry install
+```
+
+환경 변수 설정
+```
+export APP_ENV=local
+export APP_ENV=test
+```

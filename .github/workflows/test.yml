@@ -14,9 +14,9 @@ jobs:
         python-version: 3.8
 
     - name: Install dependencies
-    - uses: actions/checkout@v1
-    - uses: actions/setup-python@v1
-    - run: |
+      uses: actions/checkout@v1
+      uses: actions/setup-python@v1
+      run: |
         pip install -U pip
         pip install poetry
         poetry install

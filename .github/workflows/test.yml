@@ -1,4 +1,5 @@
-name: Test
+name: Pytest
+
 on:
   pull_request:
     branches: [ develop ]

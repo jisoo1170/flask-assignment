@@ -24,8 +24,9 @@ jobs:
         POETRY_VIRTUALENVS_CREATE: false
 
     - name: Build coverage file
-      run: |
-        pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=app tests/ | tee pytest-coverage.txt
+      uses: paolorechia/fast-pytest-github-action@develop
+      with:
+        pytest_args: '--junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=app tests/ | tee pytest-coverage.txt'
 
     - name: Pytest coverage comment
       uses: MishaKav/pytest-coverage-comment@main

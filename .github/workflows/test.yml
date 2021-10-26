@@ -54,17 +54,18 @@ jobs:
       run: poetry install --no-interaction --no-root
 
     - name: Build coverage file
-      id: run-test
       run: |
         pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=app tests/ | tee pytest-coverage.txt
 
-    - name: Get Error
-      if: steps.run-test.outputs.errors > 0 || steps.run-test.oupts.failures > 0
-      run: exit 1
 
     - name: Pytest coverage comment
+      id: run-test
       uses: MishaKav/pytest-coverage-comment@main
       with:
         pytest-coverage-path: ./pytest-coverage.txt
         junitxml-path: ./pytest.xml
         create-new-comment: true
+
+    - name: Get Error
+      if: steps.run-test.outputs.errors > 0 || steps.run-test.oupts.failures > 0
+      run: exit 1

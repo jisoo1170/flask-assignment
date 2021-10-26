@@ -59,7 +59,7 @@ jobs:
         pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=app tests/ | tee pytest-coverage.txt
 
     - name: Get Error
-      if: steps.run-test.outputs.errors > 0 | steps.run-test.oupts.failures > 0
+      if: steps.run-test.outputs.errors > 0 || steps.run-test.oupts.failures > 0
       run: exit 1
 
     - name: Pytest coverage comment

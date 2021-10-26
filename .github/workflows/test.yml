@@ -9,12 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-      - run: python -m pip install black flake8 isort
-      - run: |
-          flake8 .
-          black . --check
-          isort .
+      - uses: reviewdog/action-black@v2
+      with:
+        reporter: github-pr-check
+        level: warning
 
   test:
     runs-on: ubuntu-latest

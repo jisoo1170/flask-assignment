@@ -50,13 +50,12 @@ jobs:
         key: venv-ubuntu-**/poetry.lock
 
     - name: Install dependencies
-      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-      run: poetry install --no-interaction --no-root
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'false'
+      run: poetry install
 
     - name: Build coverage file
       run: |
         pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=app tests/ | tee pytest-coverage.txt
-
 
     - name: Pytest coverage comment
       id: run-test

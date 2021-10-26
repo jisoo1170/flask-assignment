@@ -27,6 +27,7 @@ jobs:
       uses: paolorechia/fast-pytest-github-action@develop
       with:
         pytest_args: '--junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=app tests/ | tee pytest-coverage.txt'
+        requirements_file: ''
 
     - name: Pytest coverage comment
       uses: MishaKav/pytest-coverage-comment@main

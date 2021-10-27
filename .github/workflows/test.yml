@@ -11,6 +11,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: reviewdog/action-black@v2
       with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
         reporter: github-pr-review
         level: warning
 
@@ -20,6 +21,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: dciborow/action-pylint@0.0.3
         with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
           level: warning
 

@@ -5,15 +5,24 @@ on:
     branches: [ develop ]
 
 jobs:
-  linting:
+  formatting:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - uses: reviewdog/action-black@v2
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
         reporter: github-pr-review
         level: warning
+
+  pylint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dciborow/action-pylint@v1
+        with:
+          reporter: github-pr-review
+          level: warning
+
 
   test:
     runs-on: ubuntu-latest

@@ -62,8 +62,7 @@ jobs:
 
     - name: Run pytest
       run: |
-        poetry env info
-        source $HOME/.poetry/env
+        source venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}/virtualenvs
         PHASE=test pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=app tests/ | tee pytest-coverage.txt
 
     - name: Pytest coverage comment

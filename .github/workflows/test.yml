@@ -14,14 +14,6 @@ jobs:
         reporter: github-pr-review
         level: warning
 
-  pylint:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - uses: ricardochaves/python-lint@v1.4.0
-      with:
-        python-root-list: "app"
-
   test:
     runs-on: ubuntu-latest
     steps:
@@ -40,6 +32,11 @@ jobs:
         poetry install --no-root
       env:
         POETRY_VIRTUALENVS_CREATE: false
+
+    - name: pylint
+      uses: ricardochaves/python-lint@v1.4.0
+      with:
+        python-root-list: "app"
 
     - name: Run pytest
       run: |

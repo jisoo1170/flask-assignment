@@ -19,10 +19,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: dciborow/action-pylint@v0.0.3
+      - uses: dciborow/action-pylint@v1
         with:
           reporter: github-pr-review
           level: warning
+
+      - name: pylint
+        uses: ricardochaves/python-lint@v1.4.0
+        with:
+          python-root-list: "app"
 
   test:
     runs-on: ubuntu-latest
@@ -38,15 +43,25 @@ jobs:
         pip install -U pip
         pip install pytest-cov
         pip install wheel
-        pip install poetry
-        poetry install --no-root
       env:
         POETRY_VIRTUALENVS_CREATE: false
 
-    - name: pylint
-      uses: ricardochaves/python-lint@v1.4.0
+    - name: Install poetry
+      uses: snok/install-poetry@v1.0.0
       with:
-        python-root-list: "app"
+        virtualenvs-create: false
+        virtualenvs-in-project: false
+
+    - name: Load cached venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v2
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+
+    - name: Install dependencies
+      run: poetry install
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
 
     - name: Run pytest
       run: |

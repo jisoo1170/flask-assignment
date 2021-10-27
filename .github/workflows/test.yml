@@ -36,27 +36,13 @@ jobs:
       run: |
         pip install pytest-cov
         pip install wheel
-
-    - name: Install poetry
-      uses: snok/install-poetry@v1.0.0
-      with:
-        virtualenvs-create: true
-        virtualenvs-in-project: true
-
-    - name: Load cached venv
-      id: cached-poetry-dependencies
-      uses: actions/cache@v2
-      with:
-        path: .venv
-        key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
-
-    - name: Install dependencies
-      run: poetry install
-      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        pip install poetry
+        poetry install --no-root
+      env:
+        POETRY_VIRTUALENVS_CREATE: false
 
     - name: Run pytest
       run: |
-        source poetry/virtualenvs
         PHASE=test pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=app tests/ | tee pytest-coverage.txt
 
     - name: Pytest coverage comment

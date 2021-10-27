@@ -23,11 +23,6 @@ jobs:
           reporter: github-pr-review
           level: warning
 
-      - name: pylint
-        uses: ricardochaves/python-lint@v1.4.0
-        with:
-          python-root-list: "app"
-
   test:
     runs-on: ubuntu-latest
     steps:

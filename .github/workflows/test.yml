@@ -19,6 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: reviewdog/action-setup@v1
+        with:
+          reviewdog_version: latest
 
       - name: Set up Python 3.8
         uses: actions/setup-python@v1
@@ -30,11 +33,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install pylint
           pylint --generate-rcfile > ~/.pylintrc
-
-      - name: Setup reviewdog
-        run: |
-          mkdir -p $HOME/bin && curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b $HOME/bin
-          echo ::add-path::$HOME/bin
 
       - name: Run reviewdog
         env:

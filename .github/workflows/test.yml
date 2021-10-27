@@ -62,6 +62,7 @@ jobs:
 
     - name: Run pytest
       run: |
+        source $HOME/.poetry/env
         PHASE=test pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=app tests/ | tee pytest-coverage.txt
 
     - name: Pytest coverage comment

@@ -38,13 +38,10 @@ jobs:
       with:
         python-version: 3.8
 
-    - name: Install Poetry
+    - name: Install pip
       run: |
-        pip install -U pip
         pip install pytest-cov
         pip install wheel
-      env:
-        POETRY_VIRTUALENVS_CREATE: false
 
     - name: Install poetry
       uses: snok/install-poetry@v1.0.0

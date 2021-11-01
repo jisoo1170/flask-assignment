@@ -22,6 +22,7 @@ jobs:
       - uses: wemake-services/wemake-python-styleguide@0.15.3
         with:
           reporter: 'github-pr-review'
+          level: warning
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

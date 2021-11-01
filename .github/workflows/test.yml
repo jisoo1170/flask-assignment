@@ -15,30 +15,16 @@ jobs:
         reporter: github-pr-review
         level: warning
 
-  pylint:
+  styleguid:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: reviewdog/action-setup@v1
+      - name: wemake-python-styleguide
+        uses: wemake-services/wemake-python-styleguide
         with:
-          reviewdog_version: latest
-
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.8
-
-      - name: Setup pylint
-        run: |
-          python -m pip install --upgrade pip
-          pip install pylint
-          pylint --generate-rcfile > ~/.pylintrc
-
-      - name: Run reviewdog
+          reporter: 'github-pr-review'
         env:
-          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          pylint --rcfile=~/.pylintrc app/*.py | reviewdog -efm="%f:%l:%c: %m" -reporter=github-pr-review -level=warning
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   test:
     runs-on: ubuntu-latest
@@ -68,7 +54,7 @@ jobs:
       with:
         pytest-coverage-path: ./pytest-coverage.txt
         junitxml-path: ./pytest.xml
-        create-new-comment: true
+        create-new-comment: false
 
     - name: Get Error
       if: steps.run-test.outputs.errors > 0 || steps.run-test.oupts.failures > 0

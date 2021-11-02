@@ -9,9 +9,11 @@ repos:
           args:
             - --line-length=160
 
-    - repo: local
+    - repo: https://github.com/pycqa/pylint
+      rev: pylint-2.6.0
       hooks:
         - id: pylint
-          name: pylint
-          entry: bash -c 'pwd; poetry run pylint; exit 0'
-          language: python
+          args:
+            - --max-line-length=120
+            - --rcfile=.pylintrc
+            - --config ./pyproject.toml

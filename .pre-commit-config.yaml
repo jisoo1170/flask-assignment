@@ -3,16 +3,23 @@ default_language_version:
 
 repos:
     - repo: https://github.com/psf/black
-      rev: stable
+      rev: 21.10b0
       hooks:
         - id: black
           args:
             - --line-length=120
 
-    - repo: https://github.com/pycqa/pylint
-      rev: pylint-2.6.0
+    - repo: local
       hooks:
-          - id: pylint
-            args:
-                - --max-line-length=120
-                - --rcfile=.pylintrc
+        - id: pylint
+          name: pylint
+          entry: pylint
+          language: system
+          types: [python]
+          args:
+            [
+              "--rcfile=pylintrc",
+              "--max-line-length=120",
+            ]
+          # disabled plugins: pylint.extensions.mccabe
+          exclude: tests

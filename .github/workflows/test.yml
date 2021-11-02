@@ -33,6 +33,10 @@ jobs:
       env:
         POETRY_VIRTUALENVS_CREATE: false
 
+    - name: Run Pylint
+      run: |
+        pylint app/ --max-line-length=120 --rcfile=.pylintrc
+
     - name: Run pytest
       run: |
         PHASE=test pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=app tests/ | tee pytest-coverage.txt

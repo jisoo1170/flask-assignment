@@ -8,3 +8,11 @@ repos:
         - id: black
           args:
             - --line-length=160
+    - repo: local
+      hooks:
+        - id: pylint
+          name: pylint
+          entry: bash -c 'pylint app --rcfile=.pylintrc; exit 0'
+          language: python
+          verbose: true
+          pass_filenames: false

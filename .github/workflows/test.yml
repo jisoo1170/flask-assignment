@@ -42,4 +42,5 @@ jobs:
         echo "Coverage Tests - ${{ steps.run-test.outputs.tests }}"
         echo "Coverage Time - ${{ steps.run-test.outputs.time }}"
         if [[ 0 > 0 || 0 > 0 ]]; then
-        exit 1
+          exit 1
+        fi

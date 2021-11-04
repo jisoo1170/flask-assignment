@@ -15,13 +15,13 @@ class Describe_Userview:
 
         @pytest.fixture
         def subject(self, client, user):
-            url = url_for('UserView:signup')
+            url = url_for("UserView:signup")
             response = client.post(url, json=UserCreateSchema().dump(user))
             return response
 
         class Context_정상_요청:
             def test_회원가입이_된다_201(self, subject):
-                assert subject.status_code == 201
+                assert subject.status_code == 204
 
         class Context_이름이_없는_경우:
             @pytest.fixture
@@ -57,14 +57,14 @@ class Describe_Userview:
 
         @pytest.fixture
         def subject(self, client, request_user):
-            url = url_for('UserView:login')
+            url = url_for("UserView:login")
             response = client.post(url, json=UserLoginSchema().dump(request_user))
             return response
 
         class Context_정상_요청:
             def test_로그인이_된다_200(self, subject):
                 assert subject.status_code == 200
-                assert subject.json['access_token']
+                assert subject.json["access_token"]
 
         class Context_존재하지_않는_사용자:
             @pytest.fixture
@@ -77,7 +77,7 @@ class Describe_Userview:
         class Context_비밀번호_불일치:
             @pytest.fixture
             def request_user(self, request_user):
-                request_user.password = 'wrong_password'
+                request_user.password = "wrong_password"
                 return request_user
 
             def test_400을_반환한다(self, subject):
@@ -86,7 +86,7 @@ class Describe_Userview:
     class Describe_get_me:
         @pytest.fixture
         def subject(self, client, headers):
-            url = url_for('UserView:get_me')
+            url = url_for("UserView:get_me")
             response = client.get(url, headers=headers)
             return response
 
@@ -114,12 +114,12 @@ class Describe_Userview:
     class Describe_change_password:
         @pytest.fixture
         def logged_in_user(self, logged_in_user):
-            logged_in_user.password = 'change password'
+            logged_in_user.password = "change password"
             return logged_in_user
 
         @pytest.fixture()
         def subject(self, client, headers, logged_in_user):
-            url = url_for('UserView:change_my_password')
+            url = url_for("UserView:change_my_password")
             response = client.patch(url, headers=headers, json=UserPasswordChangeSchema().dump(logged_in_user))
             return response
 
@@ -130,47 +130,47 @@ class Describe_Userview:
     class Describe_get_posts:
         @pytest.fixture()
         def subject(self, client, headers):
-            url = url_for('UserView:my_posts')
+            url = url_for("UserView:my_posts")
             response = client.get(url, headers=headers)
             return response
 
         class Context_정상_요청:
             def test_작성한_게시글을_반환한다(self, subject):
                 assert subject.status_code == 200
-                assert 'items' in subject.json
+                assert "items" in subject.json
 
     class Describe_get_comments:
         @pytest.fixture()
         def subject(self, client, headers):
-            url = url_for('UserView:my_comments')
+            url = url_for("UserView:my_comments")
             response = client.get(url, headers=headers)
             return response
 
         class Context_정상_요청:
             def test_작성한_댓글을_반환한다(self, subject):
                 assert subject.status_code == 200
-                assert 'items' in subject.json
+                assert "items" in subject.json
 
     class Describe_get_recomments:
         @pytest.fixture()
         def subject(self, client, headers):
-            url = url_for('UserView:my_recomments')
+            url = url_for("UserView:my_recomments")
             response = client.get(url, headers=headers)
             return response
 
         class Context_정상_요청:
             def test_작성한_게시글을_반환한다(self, subject):
                 assert subject.status_code == 200
-                assert 'items' in subject.json
+                assert "items" in subject.json
 
     class Describe_get_liked_posts:
         @pytest.fixture()
         def subject(self, client, headers):
-            url = url_for('UserView:my_liked_posts')
+            url = url_for("UserView:my_liked_posts")
             response = client.get(url, headers=headers)
             return response
 
         class Context_정상_요청:
             def test_작성한_게시글을_반환한다(self, subject):
                 assert subject.status_code == 200
-                assert 'items' in subject.json
+                assert "items" in subject.json

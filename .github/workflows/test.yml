@@ -5,16 +5,6 @@ on:
     branches: [ develop ]
 
 jobs:
-  styleguid:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: wemake-services/wemake-python-styleguide@0.15.3
-        with:
-          reporter: 'github-pr-review'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   test:
     runs-on: ubuntu-latest
     steps:

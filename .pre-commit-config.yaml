@@ -14,8 +14,7 @@ repos:
       hooks:
         - id: pylint
           verbose: true
-          pass_filenames: false
           args:
-            - app
             - --rcfile=.pylintrc
             - --exit-zero
+            - --ignore=tests

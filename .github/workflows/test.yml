@@ -36,5 +36,5 @@ jobs:
         create-new-comment: false
 
     - name: Get Error
-      if: ${{steps.run-test.outputs.errors}} > 0 || ${{steps.run-test.oupts.failures}} > 0
+      if: steps.run-test.outputs.errors > 0 || steps.run-test.oupts.failures > 0
       run: exit 1

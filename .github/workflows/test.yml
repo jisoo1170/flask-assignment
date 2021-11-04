@@ -24,11 +24,12 @@ jobs:
         POETRY_VIRTUALENVS_CREATE: false
 
     - name: Run pytest
+      id: run-test
       run: |
         PHASE=test pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=app tests/ | tee pytest-coverage.txt
 
     - name: Pytest coverage comment
-      id: run-test
+      id: create-coverage
       uses: MishaKav/pytest-coverage-comment@main
       with:
         pytest-coverage-path: ./pytest-coverage.txt
@@ -37,4 +38,8 @@ jobs:
 
     - name: Get Error
       if: steps.run-test.outputs.errors > 0 || steps.run-test.oupts.failures > 0
+      run: exit 1
+
+    - name: Get Error2
+      if: steps.run-test.outputs.failed > 0
       run: exit 1

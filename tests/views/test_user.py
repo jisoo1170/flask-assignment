@@ -21,7 +21,7 @@ class Describe_Userview:
 
         class Context_정상_요청:
             def test_회원가입이_된다_201(self, subject):
-                assert subject.status_code == 204
+                assert subject.status_code == 200
 
         class Context_이름이_없는_경우:
             @pytest.fixture

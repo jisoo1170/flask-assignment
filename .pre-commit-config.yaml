@@ -14,7 +14,7 @@ repos:
       hooks:
         - id: pylint
           verbose: true
+          exclude: tests/
           args:
             - --rcfile=.pylintrc
             - --exit-zero
-            - --ignore=tests

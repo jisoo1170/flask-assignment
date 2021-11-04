@@ -25,7 +25,7 @@ jobs:
 
     - name: Run pytest
       run: |
-        PHASE=test pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=app tests/ | tee pytest-coverage.txt
+        PHASE=test pytest --failed-first --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=app tests/ | tee pytest-coverage.txt
 
     - name: Pytest coverage comment
       id: run-test

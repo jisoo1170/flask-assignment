@@ -33,7 +33,6 @@ jobs:
       with:
         pytest-coverage-path: ./pytest-coverage.txt
         junitxml-path: ./pytest.xml
-        create-new-comment: false
 
     - name: Get Error
       run: |

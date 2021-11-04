@@ -30,7 +30,7 @@ class Describe_Userview:
                 return user
 
             def test_400을_반환한다(self, subject):
-                assert subject.status_code == 400
+                assert subject.status_code == 404
 
         class Context_비밀번호가_없는_경우:
             @pytest.fixture()

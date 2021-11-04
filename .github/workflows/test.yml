@@ -25,7 +25,7 @@ jobs:
 
     - name: Run pytest
       run: |
-        PHASE=test pytest --numprocess=auto --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=app tests/ | tee pytest-coverage.txt
+        PHASE=test pytest --numprocesses=auto --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=app tests/ | tee pytest-coverage.txt
 
     - name: Pytest coverage comment
       id: run-test
@@ -41,5 +41,5 @@ jobs:
         echo "Coverage Skipped - ${{ steps.run-test.outputs.skipped }}"
         echo "Coverage Tests - ${{ steps.run-test.outputs.tests }}"
         echo "Coverage Time - ${{ steps.run-test.outputs.time }}"
-        if [[ ${{steps.run-test.outputs.errors}} > 0 || ${{steps.run-test.oupts.failures}} > 0 ]]; then
+        if [[ ${{steps.run-test.outputs.errors}} > 0 || ${{steps.run-test.outputs.failures}} > 0 ]]; then
             exit 1

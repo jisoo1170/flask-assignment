@@ -18,5 +18,4 @@ def login_required(func):
 
         g.user = user
         return func(*args, **kwargs)
-
     return decorator

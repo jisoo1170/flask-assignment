@@ -28,7 +28,7 @@ class PostCreateSchema(PostSchema):
 
 class PostUpdateSchema(PostSchema):
     class Meta:
-        fields = ('title', 'content', 'tags')
+        fields = ('title', 'content', "tags")
 
 
 class PostPaginationSchema(Schema):

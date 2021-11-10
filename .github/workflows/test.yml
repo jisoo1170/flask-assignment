@@ -5,6 +5,42 @@ on:
     branches: [ develop ]
 
 jobs:
+  test1:
+    name: Test Coverage
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install pip
+        run: |
+          pip install pytest-cov
+          pip install wheel
+          pip install poetry
+          poetry install --no-root
+        env:
+          POETRY_VIRTUALENVS_CREATE: false
+
+      - name: Run pytest
+        run: |
+          PHASE=test pytest --picked --numprocesses=auto --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=app tests/ | tee pytest-coverage.txt
+
+      - name: Pytest coverage comment
+        id: run-test
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          pytest-coverage-path: ./pytest-coverage.txt
+          junitxml-path: ./pytest.xml
+
+      - name: Get Error
+        run: |
+          if [[ ${{steps.run-test.outputs.errors}} > 0 || ${{steps.run-test.outputs.failures}} > 0 ]]; then
+            exit 1
+          fi
+
   test:
     runs-on: ubuntu-latest
     steps:

@@ -447,6 +447,17 @@ Werkzeug = ">=0.7"
 docs = ["sphinx", "sphinx-rtd-theme"]
 
 [[package]]
+name = "pytest-picked"
+version = "0.4.6"
+description = "Run the tests related to the changed files"
+category = "dev"
+optional = false
+python-versions = ">=3.5"
+
+[package.dependencies]
+pytest = ">=3.5.0"
+
+[[package]]
 name = "pytest-rerunfailures"
 version = "9.0"
 description = "pytest plugin to re-run tests to eliminate flaky failures"
@@ -563,7 +574,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "9e759da17f24401c41e9cdf498aefc87c4426578ad5bfe71ca262f17606bd51e"
+content-hash = "c929382f82d6ec39fe79b7b70e8ad949e7e4d5bce702811f09f0f15ff92fc519"
 
 [metadata.files]
 astroid = [
@@ -837,6 +848,10 @@ pytest-factoryboy = [
 pytest-flask = [
     {file = "pytest-flask-1.0.0.tar.gz", hash = "sha256:4d5678a045c07317618d80223ea124e21e8acc89dae109542dd1fdf6783d96c2"},
     {file = "pytest_flask-1.0.0-py3-none-any.whl", hash = "sha256:44948d3feab48c69e89b087129cc4db66bad9cb5aa472c08dfc798c69f4eac67"},
+]
+pytest-picked = [
+    {file = "pytest-picked-0.4.6.tar.gz", hash = "sha256:e1ec7aee5d2cd3a91f676fd0afd7620a26c0ccc21e604152bbc5137f430e6c00"},
+    {file = "pytest_picked-0.4.6-py3-none-any.whl", hash = "sha256:8bc744222a39ecc84cbcb87251fb69810ee576a80f84cc77fc47222818b3fa7c"},
 ]
 pytest-rerunfailures = [
     {file = "pytest-rerunfailures-9.0.tar.gz", hash = "sha256:895ac2a6486c0da0468ae31768b818d9f3f7fceddef110970c7dbb09e7b4b8e4"},

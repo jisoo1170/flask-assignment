@@ -9,18 +9,18 @@ jobs:
     name: Test, Build, Push, Commit
     runs-on: ubuntu-18.04
     steps:
-    - uses: actions/checkout@v2
-      with:
-        repository: jisoo1170/k8s-study
-        token: ${{ secrets.REPO_TOKEN }}
-        path: infra-repo
-    - run: |
-        ls
-        cd infra-repo
-        ls
-        git config user.name github-actions
-        git config user.email github-actions@github.com
-        date > generated.txt
-        git add .
-        git commit -m "Add > generated"
-        git push
+      - name: Checkout Infra Repository
+      - uses: actions/checkout@v2
+        with:
+          repository: jisoo1170/k8s-study
+          token: ${{ secrets.REPO_TOKEN }}
+          path: infra-repo
+      - name: Update Infra Repository
+      - run: |
+          cd infra-repo
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          date > generated2.txt
+          git add .
+          git commit -m "Add > generated"
+          git push

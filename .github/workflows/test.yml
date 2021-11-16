@@ -23,4 +23,4 @@ jobs:
         date > generated.txt
         git add .
         git commit -m "Add > generated"
-        git push origin master
+        git push

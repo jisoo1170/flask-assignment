@@ -9,7 +9,6 @@ jobs:
     name: Test, Build, Push, Commit
     runs-on: ubuntu-18.04
     steps:
-    - name: update infra repo
     - uses: actions/checkout@v2
       with:
         repository: jisoo1170/k8s-study

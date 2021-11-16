@@ -5,78 +5,20 @@ on:
     branches: [ develop ]
 
 jobs:
-  test1:
-    name: Test Coverage
-    runs-on: ubuntu-latest
+  build:
+    name: Test, Build, Push, Commit
+    runs-on: ubuntu-18.04
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
-
-      - name: Install pip
-        run: |
-          pip install pytest-cov
-          pip install wheel
-          pip install poetry
-          poetry install --no-root
-        env:
-          POETRY_VIRTUALENVS_CREATE: false
-
-      - name: Run pytest
-        run: |
-          PHASE=test pytest --picked --numprocesses=auto --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=app tests/ | tee pytest-coverage.txt
-
-      - name: Pytest coverage comment
-        id: run-test
-        uses: MishaKav/pytest-coverage-comment@main
-        with:
-          pytest-coverage-path: ./pytest-coverage.txt
-          junitxml-path: ./pytest.xml
-
-      - name: Get Error
-        run: |
-          if [[ ${{steps.run-test.outputs.errors}} > 0 || ${{steps.run-test.outputs.failures}} > 0 ]]; then
-            exit 1
-          fi
-
-  test:
-    runs-on: ubuntu-latest
-    steps:
+    - name: update infra repo
     - uses: actions/checkout@v2
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
       with:
-        python-version: 3.8
-
-    - name: Install pip
+        repository: jisoo1170/k8s-study
+        token: ${{ secrets.REPO_TOKEN }}
+        path: infra-repo
       run: |
-        pip install pytest-cov
-        pip install wheel
-        pip install poetry
-        poetry install --no-root
-      env:
-        POETRY_VIRTUALENVS_CREATE: false
-
-    - name: Run pytest
-      run: |
-        PHASE=test pytest --numprocesses=auto --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=app tests/ | tee pytest-coverage.txt
-
-    - name: Pytest coverage comment
-      id: run-test
-      uses: MishaKav/pytest-coverage-comment@main
-      with:
-        pytest-coverage-path: ./pytest-coverage.txt
-        junitxml-path: ./pytest.xml
-
-    - name: Get Error
-      run: |
-        echo "Coverage Errors - ${{ steps.run-test.outputs.errors }}"
-        echo "Coverage Failures - ${{ steps.run-test.outputs.failures }}"
-        echo "Coverage Skipped - ${{ steps.run-test.outputs.skipped }}"
-        echo "Coverage Tests - ${{ steps.run-test.outputs.tests }}"
-        echo "Coverage Time - ${{ steps.run-test.outputs.time }}"
-        if [[ 0 > 0 || 0 > 0 ]]; then
-          exit 1
-        fi
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        date > generated.txt
+        git add .
+        git commit -m "Add > generated"
+        git push origin master

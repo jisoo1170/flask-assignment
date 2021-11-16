@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
+        with:
+          path: app-repo
       - name: Set up Python 3.8
         uses: actions/setup-python@v2
         with:
@@ -23,7 +25,7 @@ jobs:
           POETRY_VIRTUALENVS_CREATE: false
       - name: Run Pytest
         run: |
-          PHASE=test pytest tests
+          PHASE=test pytest app-repo/tests
 
   build:
     name: Test, Build, Push, Commit

@@ -10,15 +10,12 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-        with:
-          path: app-repo
       - name: Set up Python 3.8
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
       - name: Poetry Install
         run: |
-          cd app-repo
           pip install wheel
           pip install poetry
           poetry install --no-root
@@ -38,10 +35,8 @@ jobs:
         with:
           repository: jisoo1170/k8s-study
           token: ${{ secrets.REPO_TOKEN }}
-          path: infra-repo
       - name: Update Infra Repository
         run: |
-          cd infra-repo
           git config user.name github-actions
           git config user.email github-actions@github.com
           date > generated2.txt

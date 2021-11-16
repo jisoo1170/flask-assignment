@@ -21,7 +21,7 @@ class Describe_Userview:
 
         class Context_정상_요청:
             def test_회원가입이_된다_201(self, subject):
-                assert subject.status_code == 200
+                assert subject.status_code == 201
 
         class Context_이름이_없는_경우:
             @pytest.fixture
@@ -30,7 +30,7 @@ class Describe_Userview:
                 return user
 
             def test_400을_반환한다(self, subject):
-                assert subject.status_code == 404
+                assert subject.status_code == 400
 
         class Context_비밀번호가_없는_경우:
             @pytest.fixture()

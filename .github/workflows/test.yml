@@ -23,7 +23,7 @@ jobs:
           POETRY_VIRTUALENVS_CREATE: false
       - name: Run Pytest
         run: |
-          PHASE=test pytest --numprocesses=auto tests
+          PHASE=test pytest tests
 
   build:
     name: Test, Build, Push, Commit

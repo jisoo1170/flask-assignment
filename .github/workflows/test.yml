@@ -5,9 +5,30 @@ on:
     branches: [ develop ]
 
 jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Poetry Install
+        run: |
+          pip install wheel
+          pip install poetry
+          poetry install --no-root
+        env:
+          POETRY_VIRTUALENVS_CREATE: false
+      - name: Run Pytest
+        run: |
+          PHASE=test pytest --numprocesses=auto
+
   build:
     name: Test, Build, Push, Commit
     runs-on: ubuntu-18.04
+    needs: [ test ]
     steps:
       - name: Checkout Infra Repository
         uses: actions/checkout@v2

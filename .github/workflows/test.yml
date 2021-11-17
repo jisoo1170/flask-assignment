@@ -41,7 +41,8 @@ jobs:
           ls
           git config user.name github-actions
           git config user.email github-actions@github.com
-          kustomize edit set image development/backend-image=latest
+          cd development
+          kustomize edit set image backend-image=latest
           git add .
           git commit -m "Add > generated"
           git push

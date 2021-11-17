@@ -40,7 +40,7 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          kustomize edit set image develoment/backend-image=latest
+          kustomize edit set image development/backend-image=latest
           git add .
           git commit -m "Add > generated"
           git push

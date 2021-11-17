@@ -10,20 +10,20 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-#      - name: Set up Python 3.8
-#        uses: actions/setup-python@v2
-#        with:
-#          python-version: 3.8
-#      - name: Poetry Install
-#        run: |
-#          pip install wheel
-#          pip install poetry
-#          poetry install --no-root
-#        env:
-#          POETRY_VIRTUALENVS_CREATE: false
-#      - name: Run Pytest
-#        run: |
-#          PHASE=test pytest tests
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Poetry Install
+        run: |
+          pip install wheel
+          pip install poetry
+          poetry install --no-root
+        env:
+          POETRY_VIRTUALENVS_CREATE: false
+      - name: Run Pytest
+        run: |
+          PHASE=test pytest tests
 
       - name: Install kustomize
         run: |
@@ -42,7 +42,7 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           cd development
-          kustomize edit set image backend-image=latest
+          kustomize edit set image backend-image=nginx:latest
           git add .
           git commit -m "Add > generated"
           git push

@@ -5,8 +5,8 @@ on:
     branches: [ develop ]
 
 jobs:
-  test:
-    name: Test
+  build:
+    name: Test, Build, Push, Commit
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -25,11 +25,6 @@ jobs:
         run: |
           PHASE=test pytest tests
 
-  build:
-    name: Test, Build, Push, Commit
-    runs-on: ubuntu-18.04
-    needs: [ test ]
-    steps:
       - name: Checkout Infra Repository
         uses: actions/checkout@v2
         with:
@@ -39,7 +34,7 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          date > generated2.txt
+          date > hi/generated2.txt
           git add .
           git commit -m "Add > generated"
           git push

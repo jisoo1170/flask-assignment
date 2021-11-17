@@ -25,6 +25,12 @@ jobs:
         run: |
           PHASE=test pytest tests
 
+      - name: Install kustomize
+        run: |
+          curl -s https://api.github.com/repos/kubernetes-sigs/kustomize/releases | grep browser_download | grep linux_amd | cut -d '"' -f 4 | grep /kustomize/v | sort | tail -n 1 | xargs curl -O -L
+          tar xzf ./kustomize_v*_linux_amd64.tar.gz
+          sudo cp ./kustomize /usr/bin/kustomize
+
       - name: Checkout Infra Repository
         uses: actions/checkout@v2
         with:
@@ -34,7 +40,7 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          date > hi/generated2.txt
+          kustomize edit set image develoment/backend-image=latest
           git add .
           git commit -m "Add > generated"
           git push

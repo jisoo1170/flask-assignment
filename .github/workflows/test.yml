@@ -40,10 +40,6 @@ jobs:
         run: |
           ls
           git --version
-          add-apt-repository ppa:git-core/ppa -y
-          sudo apt-get update
-          sudo apt-get install git -y
-          git --version
 
           git config user.name github-actions
           git config user.email github-actions@github.com

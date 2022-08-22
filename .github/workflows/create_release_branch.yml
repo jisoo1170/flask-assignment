@@ -33,16 +33,12 @@ jobs:
        git config user.name "GitHub Actions"
        git config user.email noreply@github.com
 
-    - name: Push new branch
-      run: git push origin release/v${{ github.event.inputs.version }}
-
     - name: Update Target Branch
       uses: fjogeleit/yaml-update-action@main
       with:
         valueFile: '.github/workflows/deploy_ci.yml'
         propertyPath: 'on.push.branches'
         value: release/v${{ github.event.inputs.version }}
-        updateFile: true
         branch: release/v${{ github.event.inputs.version }}
         createPR: false
         commitChange: false
@@ -53,12 +49,12 @@ jobs:
         valueFile: '.github/workflows/deploy_ci.yml'
         propertyPath: 'env.VERSION'
         value: v${{ github.event.inputs.version }}_${{ github.sha }}
-        updateFile: true
         branch: release/v${{ github.event.inputs.version }}
         createPR: false
-        commitChange: true
-        message: 'v${{ github.event.inputs.version }} QA 배포'
+        commitChange: false
 
+    - name: Push new branch
+      run: git push origin release/v${{ github.event.inputs.version }}
 
     - name: Create pull request into main
       uses: thomaseizinger/create-pull-request@1.0.0

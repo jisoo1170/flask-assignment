@@ -1,6 +1,9 @@
 name: Create Release Branch
 on:
   workflow_dispatch:
+    push:
+      branches:
+        - develop
     inputs:
       branch:
         description: Target Branch

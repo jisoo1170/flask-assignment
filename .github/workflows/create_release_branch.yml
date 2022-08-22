@@ -33,6 +33,9 @@ jobs:
        git config user.name "GitHub Actions"
        git config user.email noreply@github.com
 
+    - name: Push new branch
+      run: git push origin release/v${{ github.event.inputs.version }}
+
     - name: Update Target Branch
       uses: fjogeleit/yaml-update-action@main
       with:
@@ -53,10 +56,9 @@ jobs:
         updateFile: true
         branch: release/v${{ github.event.inputs.version }}
         createPR: false
-        commitChange: false
+        commitChange: true
+        message: 'v${{ github.event.inputs.version }} QA 배포'
 
-    - name: Push new branch
-      run: git push origin release/v${{ github.event.inputs.version }}
 
     - name: Create pull request into main
       uses: thomaseizinger/create-pull-request@1.0.0
@@ -76,7 +78,6 @@ jobs:
           head: release/v${{ github.event.inputs.version }}
           base: develop
           title: v${{ github.event.inputs.version }} into develop
-          reviewers: ${{ github.event.issue.user.login }}
           body: |
               This PR was created in response workflow running.
               I've updated the version name and code commit: ${{ steps.make-commit.outputs.commit }}.

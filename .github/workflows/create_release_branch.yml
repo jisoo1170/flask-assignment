@@ -42,8 +42,6 @@ jobs:
         updateFile: true
         branch: release/v${{ github.event.inputs.version }}
         createPR: false
-        commitChange: true
-        message: '${{ github.event.inputs.versionName }} QA 배포'
 
     - name: Update Image Version
       uses: fjogeleit/yaml-update-action@main
@@ -54,8 +52,6 @@ jobs:
         updateFile: true
         branch: release/v${{ github.event.inputs.version }}
         createPR: false
-        commitChange: true
-        message: '${{ github.event.inputs.versionName }} QA 배포'
 
     - name: Push new branch
       run: git push origin release/v${{ github.event.inputs.versionName }}

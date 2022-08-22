@@ -21,10 +21,9 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Checkout develop
-      run: git checkout develop
+      uses: actions/checkout@v3
+      with:
+        ref: develop
 
     - name: Create release or hotfix branch
       run: git checkout -b ${{ github.event.inputs.branch }}/v${{ github.event.inputs.version }}

@@ -36,19 +36,18 @@ jobs:
     - name: Update Target Branch
       uses: fjogeleit/yaml-update-action@main
       with:
-        valueFile: '.github/workflows/deploy_ci.yaml'
+        valueFile: '.github/workflows/deploy_ci.yml'
         propertyPath: 'on.push.branches'
         value: release/v${{ github.event.inputs.version }}
         updateFile: true
         branch: release/v${{ github.event.inputs.version }}
         createPR: false
         commitChange: false
-        message: '${{ github.event.inputs.versionName }} QA 배포'
 
     - name: Update Image Version
       uses: fjogeleit/yaml-update-action@main
       with:
-        valueFile: '.github/workflows/deploy_ci.yaml'
+        valueFile: '.github/workflows/deploy_ci.yml'
         propertyPath: 'env.VERSION'
         value: v${{ github.event.inputs.version }}_${{ github.sha }}
         updateFile: true

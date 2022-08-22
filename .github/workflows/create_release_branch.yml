@@ -1,9 +1,6 @@
 name: Create Release Branch
 on:
   workflow_dispatch:
-    push:
-      branches:
-        - develop
     inputs:
       branch:
         description: Target Branch
@@ -19,12 +16,15 @@ on:
         required: true
 
 jobs:
-  create-release:
+  create-release-branch:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+
+    - name: Checkout develop
+      run: git checkout develop
 
     - name: Create release or hotfix branch
       run: git checkout -b ${{ github.event.inputs.branch }}/v${{ github.event.inputs.version }}

@@ -1,0 +1,23 @@
+name: QA(INHOUSE) CI pipeline
+
+on:
+  push:
+    branches:
+      - release/v220825
+
+env:
+  VERSION: v220825_${{ github.sha }}
+  IMAGE_NAME: test
+  env: test
+
+jobs:
+  build:
+    name: Test, Build, Push, Commit
+
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8

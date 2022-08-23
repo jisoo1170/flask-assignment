@@ -56,6 +56,16 @@ jobs:
     - name: Cat Updated values.yaml
       run: cat .github/workflows/deploy_ci.yml
 
+    - name: Commit values.yaml
+      uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
+      with:
+        add: 'deploy_ci.yml'
+        author_name: GitHub Actions
+        author_email: noreply@github.com
+        fetch: false
+        message: v${{ github.event.inputs.version }} QA 배포
+        push: false
+
     - name: Push new branch
       run: git push origin release/v${{ github.event.inputs.version }}
 

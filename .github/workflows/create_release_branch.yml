@@ -40,6 +40,7 @@ jobs:
         propertyPath: 'on.push.branches'
         value: release/v${{ github.event.inputs.version }}
         branch: release/v${{ github.event.inputs.version }}
+        updateFile: true
         createPR: false
         commitChange: false
 
@@ -50,6 +51,7 @@ jobs:
         propertyPath: 'env.VERSION'
         value: v${{ github.event.inputs.version }}_${{ github.sha }}
         branch: release/v${{ github.event.inputs.version }}
+        updateFile: true
         createPR: false
         commitChange: false
 

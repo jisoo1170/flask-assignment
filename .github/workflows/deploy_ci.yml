@@ -1,19 +1,14 @@
 name: QA(INHOUSE) CI pipeline
-
-on:
+'on':
   push:
-    branches:
-      - release/v220825
-
+    branches: release/v220801
 env:
-  VERSION: v220825_${{ github.sha }}
+  VERSION: v220801_993964015d19cfbe9a053ede080a72f1b32bf83f
   IMAGE_NAME: test
   env: test
-
 jobs:
   build:
     name: Test, Build, Push, Commit
-
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2

@@ -21,7 +21,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v2
       with:
         ref: develop
         token: ${{ secrets.REPO_TOKEN }}
@@ -54,13 +54,10 @@ jobs:
         createPR: false
         commitChange: false
 
-    - name: Cat Updated values.yaml
-      run: cat .github/workflows/deploy_ci.yml
-
-    - name: add file
+    - name: Add File
       run: git add .github/workflows/deploy_ci.yml
 
-    - name: commit file
+    - name: Commit File
       run: git commit -m "v${{ github.event.inputs.version }} QA 배포"
 
     - name: Push new branch

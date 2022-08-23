@@ -59,7 +59,7 @@ jobs:
     - name: Commit values.yaml
       uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
       with:
-        add: 'deploy_ci.yml'
+        add: '.github/workflows/deploy_ci.yml'
         author_name: GitHub Actions
         author_email: noreply@github.com
         fetch: false

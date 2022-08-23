@@ -39,7 +39,6 @@ jobs:
         valueFile: '.github/workflows/deploy_ci.yml'
         propertyPath: 'on.push.branches'
         value: release/v${{ github.event.inputs.version }}
-        branch: release/v${{ github.event.inputs.version }}
         updateFile: true
         createPR: false
         commitChange: false
@@ -50,10 +49,12 @@ jobs:
         valueFile: '.github/workflows/deploy_ci.yml'
         propertyPath: 'env.VERSION'
         value: v${{ github.event.inputs.version }}_${{ github.sha }}
-        branch: release/v${{ github.event.inputs.version }}
         updateFile: true
         createPR: false
         commitChange: false
+
+    - name: Cat Updated values.yaml
+      run: cat .github/workflows/deploy_ci.yml
 
     - name: Push new branch
       run: git push origin release/v${{ github.event.inputs.version }}

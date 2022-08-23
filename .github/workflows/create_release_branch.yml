@@ -59,7 +59,7 @@ jobs:
       run: |
         git add .github/workflows/deploy_ci.yml
         git commit -m "v${{ github.event.inputs.version }} QA 배포"
-        git push origin release/v${{ github.event.inputs.version }}
+        git push origin ${{ github.event.inputs.branch }}/v${{ github.event.inputs.version }}
 
     - name: Create pull request into main
       uses: thomaseizinger/create-pull-request@1.0.0

@@ -64,7 +64,7 @@ jobs:
     - name: Create pull request into main
       uses: thomaseizinger/create-pull-request@1.0.0
       with:
-       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+       github_token: ${{ secrets.GITHUB_TOKEN }}
        head: release/v${{ github.event.inputs.version }}
        base: master
        title: v${{ github.event.inputs.version }} into master
@@ -75,7 +75,7 @@ jobs:
     - name: Create pull request to develop
       uses: thomaseizinger/create-pull-request@1.0.0
       with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           head: release/v${{ github.event.inputs.version }}
           base: develop
           title: v${{ github.event.inputs.version }} into develop

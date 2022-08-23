@@ -28,6 +28,7 @@ jobs:
 
     - name: Initialize git config
       run: |
+        git config --global url.https://${{ secrets.REPO_TOKEN }}@github.com/.insteadOf https://github.com/
         git config user.name "GitHub Actions"
         git config user.email noreply@github.com
 

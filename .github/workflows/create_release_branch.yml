@@ -87,8 +87,8 @@ jobs:
       uses: 8398a7/action-slack@v3
       with:
         status: ${{ job.status }}
-        author_name: Create Branch > ${{ github.event.inputs.branch }}/v${{ github.event.inputs.version }}
-        fields: action,workflow,repo
+        author_name: Create Branch "${{ github.event.inputs.branch }}/v${{ github.event.inputs.version }}"
+        fields: repo, workflow
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_URL }}
       if: always()

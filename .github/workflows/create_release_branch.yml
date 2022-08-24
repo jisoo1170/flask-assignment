@@ -89,7 +89,7 @@ jobs:
         slack-bot-user-oauth-access-token: ${{ secrets.SLACK_MESSAGE_TOKEN }}
         slack-channel: C02CEFHFL82
         slack-text: ✅ ${{ github.event.inputs.branch }}/v${{ github.event.inputs.version }} 브랜치가 생성되었습니다.
-      if: ${{ job.status }} == "success"
+      if: success()
 
     - name: Send failed message to Slack
       uses: archive/github-actions-slack@v2.0.0
@@ -97,4 +97,4 @@ jobs:
         slack-bot-user-oauth-access-token: ${{ secrets.SLACK_MESSAGE_TOKEN }}
         slack-channel: C02CEFHFL82
         slack-text: ⚠️ ${{ github.event.inputs.branch }}/v${{ github.event.inputs.version }} 브랜치 생성에 실패했습니다.
-      if: ${{ job.status }} != "success"
+      if: failure()

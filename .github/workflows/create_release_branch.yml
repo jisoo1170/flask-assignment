@@ -88,7 +88,7 @@ jobs:
       with:
         status: ${{ job.status }}
         author_name: Create Release Branch > ${{ github.event.inputs.branch }}/v${{ github.event.inputs.version }}
-        fields: repo,action,workflow
+        fields: action,workflow,repo
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_URL }}
       if: always()

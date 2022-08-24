@@ -98,3 +98,13 @@ jobs:
         slack-channel: C02CEFHFL82
         slack-text: ⚠️ ${{ github.event.inputs.branch }}/v${{ github.event.inputs.version }} 브랜치 생성에 실패했습니다.
       if: failure()
+
+    - name: Slack Notification
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        fields: repo,message,action,workflow
+        text: 'any string'
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_URL }}
+      if: always()

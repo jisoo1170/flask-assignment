@@ -82,3 +82,19 @@ jobs:
           body: |
               This PR was created in response workflow running.
               I've updated the version name and code commit: ${{ steps.make-commit.outputs.commit }}.
+
+    - name: Send success message to Slack
+      uses: archive/github-actions-slack@v2.0.0
+      with:
+        slack-bot-user-oauth-access-token: ${{ secrets.SLACK_URL }}
+        slack-channel: C02CEFHFL82
+        slack-text: ✅ ${{ github.event.inputs.branch }}/v${{ github.event.inputs.version }} 브랜치가 생성되었습니다.
+      if: ${{ job.status }} == success
+
+    - name: Send failed message to Slack
+      uses: archive/github-actions-slack@v2.0.0
+      with:
+        slack-bot-user-oauth-access-token: ${{ secrets.SLACK_URL }}
+        slack-channel: C02CEFHFL82
+        slack-text: ⚠️ ${{ github.event.inputs.branch }}/v${{ github.event.inputs.version }} 브랜치 생성에 실패했습니다.
+      if: ${{ job.status }} != success

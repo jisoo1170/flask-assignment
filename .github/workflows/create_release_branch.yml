@@ -52,12 +52,14 @@ jobs:
     - name: 'Choose new tag'
       id: new-tag
       run: |
-        if [[ "${{ github.event.inputs.version }}" == "major" ]]; then
+        if [[ "${{ steps.previous-tag.outputs.tag }}" == "1.0.0" ]]; then
+            echo "::set-output name=tag::v1.0.0"
+        elif [[ "${{ github.event.inputs.version }}" == "major" ]]; then
             echo "::set-output name=tag::${{ steps.new-tags.outputs.v_major }}"
         elif [[ "${{ github.event.inputs.version }}" == "minor" ]]; then
-            echo "::set-output name=tag::${{ steps.new-tag.outputs.v_minor }}"
+            echo "::set-output name=tag::${{ steps.new-tags.outputs.v_minor }}"
         elif [[ "${{ github.event.inputs.version }}" == "patch" ]]; then
-            echo "::set-output name=tag::${{ steps.new-tag.outputs.v_patch }}"
+            echo "::set-output name=tag::${{ steps.new-tags.outputs.v_patch }}"
         fi
 
     - name: Create release or hotfix branch

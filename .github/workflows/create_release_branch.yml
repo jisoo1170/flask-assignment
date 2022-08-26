@@ -61,14 +61,14 @@ jobs:
         fi
 
     - name: Create release or hotfix branch
-      run: git checkout -b ${{ github.event.inputs.branch }}/${{ steps.new-tag.outputs.v_major }}
+      run: git checkout -b ${{ github.event.inputs.branch }}/${{ steps.new-tag.outputs.tag }}
 
     - name: Update Target Branch
       uses: fjogeleit/yaml-update-action@main
       with:
         valueFile: '.github/workflows/deploy_ci.yml'
         propertyPath: 'on.push.branches'
-        value: ${{ github.event.inputs.branch }}/${{ steps.new-tag.outputs.v_major }}
+        value: ${{ github.event.inputs.branch }}/${{ steps.new-tag.outputs.tag }}
         updateFile: true
         createPR: false
         commitChange: false
@@ -78,7 +78,7 @@ jobs:
       with:
         valueFile: '.github/workflows/deploy_ci.yml'
         propertyPath: 'env.VERSION'
-        value: ${{ steps.new-tag.outputs.v_major }}_${{ github.sha }}
+        value: ${{ steps.new-tag.outputs.tag }}_${{ github.sha }}
         updateFile: true
         createPR: false
         commitChange: false

@@ -11,9 +11,14 @@ on:
           - release
           - hotfix
       version:
-        description: Target Version (ex. 220101)
-        type: string
+        description: Target Version
+        type: choice
         required: true
+        default: 'minor'
+        options:
+          - major
+          - minor
+          - patch
 
 jobs:
   create-release-branch:
@@ -32,15 +37,38 @@ jobs:
         git config user.name "GitHub Actions"
         git config user.email noreply@github.com
 
+    - name: 'Get Previous tag'
+      id: previous-tag
+      uses: "WyriHaximus/github-action-get-previous-tag@v1"
+      with:
+        fallback: 1.0.0 # Optional fallback tag to use when no tag can be found
+
+    - name: 'Get next tag version'
+      id: new-tags
+      uses: "WyriHaximus/github-action-next-semvers@v1"
+      with:
+        version: ${{ steps.previous-tag.outputs.tag }}
+
+    - name: 'Choose new tag'
+      id: new-tag
+      run: |
+        if [[ "${{ github.event.inputs.version }}" == "major" ]]; then
+            echo "::set-output name=new-tag::${{ steps.new-tags.outputs.v_major }}"
+        elif [[ "${{ github.event.inputs.version }}" == "minor" ]]; then
+            echo "::set-output name=new-tag::${{ steps.new-tag.outputs.v_minor }}"
+        elif [[ "${{ github.event.inputs.version }}" == "patch" ]]; then
+            echo "::set-output name=new-tag::${{ steps.new-tag.outputs.v_patch }}"
+        fi
+
     - name: Create release or hotfix branch
-      run: git checkout -b ${{ github.event.inputs.branch }}/v${{ github.event.inputs.version }}
+      run: git checkout -b ${{ github.event.inputs.branch }}/${{ steps.new-tag.outputs.v_major }}
 
     - name: Update Target Branch
       uses: fjogeleit/yaml-update-action@main
       with:
         valueFile: '.github/workflows/deploy_ci.yml'
         propertyPath: 'on.push.branches'
-        value: release/v${{ github.event.inputs.version }}
+        value: ${{ github.event.inputs.branch }}/${{ steps.new-tag.outputs.v_major }}
         updateFile: true
         createPR: false
         commitChange: false
@@ -50,7 +78,7 @@ jobs:
       with:
         valueFile: '.github/workflows/deploy_ci.yml'
         propertyPath: 'env.VERSION'
-        value: v${{ github.event.inputs.version }}_${{ github.sha }}
+        value: ${{ steps.new-tag.outputs.v_major }}_${{ github.sha }}
         updateFile: true
         createPR: false
         commitChange: false
@@ -58,16 +86,16 @@ jobs:
     - name: Push new branch
       run: |
         git add .github/workflows/deploy_ci.yml
-        git commit -m "v${{ github.event.inputs.version }} QA 배포"
-        git push origin ${{ github.event.inputs.branch }}/v${{ github.event.inputs.version }}
+        git commit -m "${{ steps.new-tag.outputs.v_major }} QA 배포"
+        git push origin ${{ github.event.inputs.branch }}/${{ steps.new-tag.outputs.v_major }}
 
     - name: Create pull request into main
       uses: thomaseizinger/create-pull-request@1.0.0
       with:
        github_token: ${{ secrets.GITHUB_TOKEN }}
-       head: release/v${{ github.event.inputs.version }}
+       head: ${{ github.event.inputs.branch }}/${{ steps.new-tag.outputs.v_major }}
        base: master
-       title: v${{ github.event.inputs.version }} into master
+       title: [배포] ${{ steps.new-tag.outputs.v_major }} into master
        body: |
            This PR was created in response workflow running.
            I've updated the version name and code commit: ${{ steps.make-commit.outputs.commit }}.
@@ -76,19 +104,9 @@ jobs:
       uses: thomaseizinger/create-pull-request@1.0.0
       with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          head: release/v${{ github.event.inputs.version }}
+          head: ${{ github.event.inputs.branch }}/${{ steps.new-tag.outputs.v_major }}
           base: develop
-          title: v${{ github.event.inputs.version }} into develop
+          title: [배포] ${{ steps.new-tag.outputs.v_major }} into develop
           body: |
               This PR was created in response workflow running.
               I've updated the version name and code commit: ${{ steps.make-commit.outputs.commit }}.
-
-    - name: Slack Notification
-      uses: 8398a7/action-slack@v3
-      with:
-        status: ${{ job.status }}
-        author_name: Create Branch "${{ github.event.inputs.branch }}/v${{ github.event.inputs.version }}"
-        fields: repo, workflow
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_URL }}
-      if: always()

@@ -95,7 +95,7 @@ jobs:
        github_token: ${{ secrets.GITHUB_TOKEN }}
        head: ${{ github.event.inputs.branch }}/${{ steps.new-tag.outputs.v_major }}
        base: master
-       title: [배포] ${{ steps.new-tag.outputs.v_major }} into master
+       title: ${{ steps.new-tag.outputs.v_major }} into master
        body: |
            This PR was created in response workflow running.
            I've updated the version name and code commit: ${{ steps.make-commit.outputs.commit }}.
@@ -106,7 +106,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           head: ${{ github.event.inputs.branch }}/${{ steps.new-tag.outputs.v_major }}
           base: develop
-          title: [배포] ${{ steps.new-tag.outputs.v_major }} into develop
+          title: ${{ steps.new-tag.outputs.v_major }} into develop
           body: |
               This PR was created in response workflow running.
               I've updated the version name and code commit: ${{ steps.make-commit.outputs.commit }}.

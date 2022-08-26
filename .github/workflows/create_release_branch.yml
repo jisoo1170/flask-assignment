@@ -53,11 +53,11 @@ jobs:
       id: new-tag
       run: |
         if [[ "${{ github.event.inputs.version }}" == "major" ]]; then
-            echo "::set-output name=new-tag::${{ steps.new-tags.outputs.v_major }}"
+            echo "::set-output name=tag::${{ steps.new-tags.outputs.v_major }}"
         elif [[ "${{ github.event.inputs.version }}" == "minor" ]]; then
-            echo "::set-output name=new-tag::${{ steps.new-tag.outputs.v_minor }}"
+            echo "::set-output name=tag::${{ steps.new-tag.outputs.v_minor }}"
         elif [[ "${{ github.event.inputs.version }}" == "patch" ]]; then
-            echo "::set-output name=new-tag::${{ steps.new-tag.outputs.v_patch }}"
+            echo "::set-output name=tag::${{ steps.new-tag.outputs.v_patch }}"
         fi
 
     - name: Create release or hotfix branch
@@ -86,16 +86,16 @@ jobs:
     - name: Push new branch
       run: |
         git add .github/workflows/deploy_ci.yml
-        git commit -m "${{ steps.new-tag.outputs.v_major }} QA 배포"
-        git push origin ${{ github.event.inputs.branch }}/${{ steps.new-tag.outputs.v_major }}
+        git commit -m "${{ steps.new-tag.outputs.tag }} QA 배포"
+        git push origin ${{ github.event.inputs.branch }}/${{ steps.new-tag.outputs.tag }}
 
     - name: Create pull request into main
       uses: thomaseizinger/create-pull-request@1.0.0
       with:
        github_token: ${{ secrets.GITHUB_TOKEN }}
-       head: ${{ github.event.inputs.branch }}/${{ steps.new-tag.outputs.v_major }}
+       head: ${{ github.event.inputs.branch }}/${{ steps.new-tag.outputs.tag }}
        base: master
-       title: ${{ steps.new-tag.outputs.v_major }} into master
+       title: ${{ steps.new-tag.outputs.tag }} into master
        body: |
            This PR was created in response workflow running.
            I've updated the version name and code commit: ${{ steps.make-commit.outputs.commit }}.
@@ -104,9 +104,9 @@ jobs:
       uses: thomaseizinger/create-pull-request@1.0.0
       with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          head: ${{ github.event.inputs.branch }}/${{ steps.new-tag.outputs.v_major }}
+          head: ${{ github.event.inputs.branch }}/${{ steps.new-tag.outputs.tag }}
           base: develop
-          title: ${{ steps.new-tag.outputs.v_major }} into develop
+          title: ${{ steps.new-tag.outputs.tag }} into develop
           body: |
               This PR was created in response workflow running.
               I've updated the version name and code commit: ${{ steps.make-commit.outputs.commit }}.

@@ -13,8 +13,8 @@ def login_required(func):
 
         try:
             user = User.objects.get(id=user_id)
-        except:
-            return {'message': '존재하지 않는 사용자입니다'}, 401
+        except Exception:
+            return {"message": "존재하지 않는 사용자입니다"}, 401
 
         g.user = user
         return func(*args, **kwargs)

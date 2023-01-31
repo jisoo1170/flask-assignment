@@ -1,0 +1,50 @@
+name: Pytest
+
+on:
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  build:
+    name: Test, Build, Push, Commit
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Poetry Install
+        run: |
+          pip install wheel
+          pip install poetry
+          poetry install --no-root
+        env:
+          POETRY_VIRTUALENVS_CREATE: false
+      - name: Run Pytest
+        run: |
+          PHASE=test pytest tests
+
+      - name: Install kustomize
+        run: |
+          curl -s https://api.github.com/repos/kubernetes-sigs/kustomize/releases | grep browser_download | grep linux_amd | cut -d '"' -f 4 | grep /kustomize/v | sort | tail -n 1 | xargs curl -O -L
+          tar xzf ./kustomize_v*_linux_amd64.tar.gz
+          sudo cp ./kustomize /usr/bin/kustomize
+
+      - name: Checkout Infra Repository
+        uses: actions/checkout@v2
+        with:
+          repository: jisoo1170/k8s-study
+          token: ${{ secrets.REPO_TOKEN }}
+      - name: Update Infra Repository
+        run: |
+          ls
+          git --version
+
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          cd development
+          kustomize edit set image backend-image=nginx:latest
+          git add .
+          git commit -m "Add > generated"
+          git push
